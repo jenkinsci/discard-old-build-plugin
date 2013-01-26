@@ -8,9 +8,11 @@
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
   <artifactId>discard-old-build</artifactId>
-  <version>1.0</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
-
+  <name>Discard Old Build plugin</name>
+  <description>Add post-build step to discard old builds with detail configuration</description>
+  
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
     <repository>
@@ -38,4 +40,12 @@
   		<scope>test</scope>
   	</dependency>
   </dependencies>
+  
+  <developers>
+    <developer>
+      <id>nkns165</id>
+      <name>Hiroko Tamagawa</name>
+      <email>nkns165@gmail.com</email>
+    </developer>
+  </developers>
 </project>
