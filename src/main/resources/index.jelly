@@ -1,0 +1,6 @@
+<!--
+  This view is used to render the installed plugins page.
+-->
+<div>
+  This plugin enables detail configuration to discard old builds using status / intervals.
+</div>
