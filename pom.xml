@@ -55,6 +55,6 @@
     <url>https://github.com/jenkinsci/discard-old-build-plugin</url>
   </scm>
 
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Display+Old+Build+plugin</url>
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Discard+Old+Build+plugin</url>
 
 </project>
