@@ -51,7 +51,7 @@
 
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/discard-old-build-plugin.git</connection>
-    <developerConnection>scm:git:ssh//git@github.com/jenkinsci/discard-old-plugin.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/jenkinsci/discard-old-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/discard-old-build-plugin</url>
   </scm>
 
