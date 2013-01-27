@@ -8,7 +8,7 @@
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
   <artifactId>discard-old-build</artifactId>
-  <version>1.0</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <name>Discard Old Build plugin</name>
   <description>Add post-build step to discard old builds with detail configuration</description>
