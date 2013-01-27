@@ -48,4 +48,13 @@
       <email>nkns165@gmail.com</email>
     </developer>
   </developers>
+
+  <scm>
+    <connection>scm:git:ssh://github.com/jenkinsci/discard-old-build-plugin.git</connection>
+    <developerConnection>scm:git:ssh//git@github.com/jenkinsci/discard-old-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/discard-old-build-plugin</url>
+  </scm>
+
+  <url>http://wiki.jenkins-ci.org/display/JENKINS/Display+Old+Build+plugin</url>
+
 </project>
