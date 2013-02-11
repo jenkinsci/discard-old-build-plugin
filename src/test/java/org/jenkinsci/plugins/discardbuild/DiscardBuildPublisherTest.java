@@ -136,6 +136,37 @@ public class DiscardBuildPublisherTest extends TestCase {
 		}
 	}
 	
+	public void testPerformNumAndStatus() throws Exception {
+		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+				"", "5",
+				false, false, true, false, false,		// failure
+				"", "",
+				false, false, true, false, false));		// failure
+		
+		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+
+		verify(buildList.get(0), times(1)).delete();
+		verify(buildList.get(1), never()).delete(); // new build
+		verify(buildList.get(2), times(1)).delete();
+		verify(buildList.get(3), times(1)).delete();
+		verify(buildList.get(4), never()).delete(); // new build
+		verify(buildList.get(5), times(1)).delete();
+		verify(buildList.get(6), times(1)).delete();
+		verify(buildList.get(7), times(1)).delete();
+		verify(buildList.get(8), times(1)).delete();
+		verify(buildList.get(9), never()).delete(); // new build
+		verify(buildList.get(10), never()).delete(); // new build
+		verify(buildList.get(11), times(1)).delete();
+		verify(buildList.get(12), times(1)).delete();
+		verify(buildList.get(13), times(1)).delete();
+		verify(buildList.get(14), times(1)).delete();
+		verify(buildList.get(15), times(1)).delete();
+		verify(buildList.get(16), never()).delete(); // new build
+		verify(buildList.get(17), times(1)).delete();
+		verify(buildList.get(18), times(1)).delete();
+		verify(buildList.get(19), times(1)).delete();
+	}
+	
 	public void testPerformIntervalDaysToKeep() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"3", "",

@@ -19,11 +19,8 @@ import hudson.util.RunList;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.jenkinsci.plugins.discardbuild.Messages;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -129,68 +126,70 @@ public class DiscardBuildPublisher extends Recorder {
 		// Reverse builds in order to avoid deleting all old builds at next build.
 		@SuppressWarnings("unchecked")
 		RunList<Run<?, ?>> builds = (RunList<Run<?, ?>>) job.getBuilds();
-		RunList<Run<?, ?>> reversedBuilds = new RunList<Run<?, ?>>();
-		reversedBuilds.addAll(builds);
-		Collections.reverse(reversedBuilds);
-		
-		Run<?, ?> prev = null;
-		int prevIndex = 0;
-		int size = reversedBuilds.size();
 		
 		try {
-		for (int i = 0; i < size; i++) {
-			Run<?, ?> r = reversedBuilds.get(i);
+			// identify latest builds to keep
+			RunList<Run<?, ?>> latestBuilds = new RunList<Run<?, ?>>();
+			RunList<Run<?, ?>> oldBuilds = new RunList<Run<?, ?>>();
+			boolean isLatest = true;
+			Calendar cal = getCurrentCalendar();
+			cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
 			
-			if (r == lsb || r == lstb) {
-				// Always keep latest successful / stable builds
-				continue;
-			} else if (newBuilds(r, i, size)) {
-				if (!discardByStatus(r, resultsToKeep, listener)) {
-					prev = r;
+			for (Run<?, ?> r : builds) {
+				if (isLatest) {
+					if ((numToKeep != -1 && latestBuilds.size() >= numToKeep) ||
+							(daysToKeep != -1 && r.getTimestamp().before(cal))) {
+						oldBuilds.add(0, r);
+						isLatest = false;
+						continue;
+					} else if (discardByStatus(r, resultsToKeep, listener)) {
+						continue;
+					} else {
+						latestBuilds.add(r);
+					}
+				} else {
+					oldBuilds.add(0, r);
 				}
-			} else if (intervalNumToKeep == -1 && intervalDaysToKeep == -1 && resultsToKeepOld.isEmpty()) {
-				discardBuild(r, "it is too old and no advanced option is set", listener); //$NON-NLS-1$
-			} else {
-				// advanced option
-				if (discardByStatus(r, resultsToKeepOld, listener)) {
+			}
+
+			// advanced option
+			Run<?, ?> prev = null;
+			int prevIndex = 0;
+			
+			for (int i = 0; i < oldBuilds.size(); i++) {
+				Run<?, ?> r = oldBuilds.get(i);
+				if (r == lsb || r == lstb) {
+					// Always keep latest successful / stable builds
 					continue;
-				} else if (prev == null) {
+				} else if (intervalNumToKeep == -1 && intervalDaysToKeep == -1 && resultsToKeepOld.isEmpty()) {
+					discardBuild(r, "it is too old and no advanced option is set", listener); //$NON-NLS-1$
+				} else {
+					if (discardByStatus(r, resultsToKeepOld, listener)) {
+						continue;
+					} else if (prev == null) {
+						prev = r;
+						prevIndex = i;
+						continue;
+					} else if (intervalNumToKeep != -1 && i < prevIndex + intervalNumToKeep) {
+						discardBuild(r, "it is old and within build number interval", listener); //$NON-NLS-1$
+						continue;
+					} else if (intervalDaysToKeep != -1) {
+						Calendar intervalCal = getCurrentCalendar();
+						intervalCal.setTime(prev.getTimestamp().getTime());
+						intervalCal.add(Calendar.DAY_OF_YEAR, intervalDaysToKeep);
+						if (r.getTimestamp().before(intervalCal)) {
+							discardBuild(r, "it is old and within build days interval", listener); //$NON-NLS-1$
+							continue;
+						}
+					}
 					prev = r;
 					prevIndex = i;
-					continue;
-				} else if (intervalNumToKeep != -1 && i < prevIndex + intervalNumToKeep) {
-					discardBuild(r, "it is old and within build number interval", listener); //$NON-NLS-1$
-					continue;
-				} else if (intervalDaysToKeep != -1) {
-					Calendar cal = getCurrentCalendar();
-					cal.setTime(prev.getTimestamp().getTime());
-					cal.add(Calendar.DAY_OF_YEAR, intervalDaysToKeep);
-					if (r.getTimestamp().before(cal)) {
-						discardBuild(r, "it is old and within build days interval", listener); //$NON-NLS-1$
-						continue;
-					}
 				}
-				prev = r;
-				prevIndex = i;
 			}
-		}
 		} catch (IOException e) {
 			e.printStackTrace(listener.error("")); //$NON-NLS-1$
 		}
 		
-		return true;
-	}
-	
-	private boolean newBuilds(Run<?, ?> history, int i, int numHistory) {
-		if (numToKeep != -1 && i < numHistory - numToKeep) {
-			return false;
-		} else if (daysToKeep != -1) {
-			Calendar cal = getCurrentCalendar();
-			cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
-			if (history.getTimestamp().before(cal)) {
-				return false;
-			}
-		}
 		return true;
 	}
 	
@@ -298,6 +297,7 @@ public class DiscardBuildPublisher extends Recorder {
 	@Extension
 	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
+		@SuppressWarnings("rawtypes")
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
 			return true;
 		}
