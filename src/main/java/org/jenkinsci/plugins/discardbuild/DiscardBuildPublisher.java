@@ -1,40 +1,31 @@
 /**
- * 
+ *
  */
 package org.jenkinsci.plugins.discardbuild;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.BuildListener;
-import hudson.model.Result;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Job;
-import hudson.model.Run;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.RunList;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.kohsuke.stapler.DataBoundConstructor;
+import java.util.*;
 
 /**
  * Builder that discards old build histories according to more detail configurations than the core function.
- * This enables discarding builds by build status or keeping older builds for every N builds / N days.
- * 
+ * This enables discarding builds by build status or keeping older builds for every N builds / N days
+ * or discarding buildswhich has too small or too big logfile size.
+ *
  * @author tamagawahiroko
  *
  */
 public class DiscardBuildPublisher extends Recorder {
-	
+
 	/**
 	 * If not -1, history is only kept up to this days.
 	 */
@@ -47,7 +38,16 @@ public class DiscardBuildPublisher extends Recorder {
 	 * Set of build results to be kept.
 	 */
 	private final Set<Result> resultsToKeep;
-	
+
+	/**
+	 * If not -1, history is only kept up to this logfile size.
+	 */
+	private final long minLogFileSize;
+	/**
+	 * If not -1, history is only kept lower than this logfile size.
+	 */
+	private final long maxLogFileSize;
+
 	/**
 	 * If not -1, old histories are kept by the specified interval days.
 	 */
@@ -60,7 +60,7 @@ public class DiscardBuildPublisher extends Recorder {
 	 * Set of build result to be kept for old builds.
 	 */
 	private final Set<Result> resultsToKeepOld;
-	
+
 	@DataBoundConstructor
 	public DiscardBuildPublisher(
 			String daysToKeep,
@@ -70,6 +70,8 @@ public class DiscardBuildPublisher extends Recorder {
 			boolean keepFailure,
 			boolean keepNotBuilt,
 			boolean keepAborted,
+			String minLogFileSize,
+			String maxLogFileSize,
 			String intervalDaysToKeep,
 			String intervalNumToKeep,
 			boolean keepSuccessOld,
@@ -81,34 +83,45 @@ public class DiscardBuildPublisher extends Recorder {
 
 		this.daysToKeep = parse(daysToKeep);
 		this.numToKeep = parse(numToKeep);
+		this.minLogFileSize = parseLong(minLogFileSize);
+		this.maxLogFileSize = parseLong(maxLogFileSize);
 		this.intervalDaysToKeep = parse(intervalDaysToKeep);
 		this.intervalNumToKeep = parse(intervalNumToKeep);
-		
+
 		resultsToKeep = new HashSet<Result>();
 		if (keepSuccess) { resultsToKeep.add(Result.SUCCESS); }
 		if (keepUnstable) { resultsToKeep.add(Result.UNSTABLE); }
 		if (keepFailure) { resultsToKeep.add(Result.FAILURE); }
 		if (keepNotBuilt) { resultsToKeep.add(Result.NOT_BUILT); }
 		if (keepAborted) { resultsToKeep.add(Result.ABORTED); }
-		
+
 		resultsToKeepOld = new HashSet<Result>();
 		if (keepSuccessOld) { resultsToKeepOld.add(Result.SUCCESS); }
 		if (keepUnstableOld) { resultsToKeepOld.add(Result.UNSTABLE); }
 		if (keepFailureOld) { resultsToKeepOld.add(Result.FAILURE); }
 		if (keepNotBuiltOld) { resultsToKeepOld.add(Result.NOT_BUILT); }
 		if (keepAbortedOld) { resultsToKeepOld.add(Result.ABORTED); }
-				
+
 	}
 
-    private static int parse(String p) {
-        if(p==null)     return -1;
-        try {
-            return Integer.parseInt(p);
-        } catch (NumberFormatException e) {
-            return -1;
-        }
-    }
-    
+	private static int parse(String p) {
+		if(p==null)     return -1;
+		try {
+			return Integer.parseInt(p);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+
+	private static long parseLong(String p) {
+		if(p==null)     return -1;
+		try {
+			return Long.parseLong(p);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+
     private static String intToString(int i) {
     	if (i == -1) {
     		return ""; //$NON-NLS-1$
@@ -117,18 +130,26 @@ public class DiscardBuildPublisher extends Recorder {
     	}
     }
 
+    private static String longToString(long i) {
+	    if (i == -1) {
+            return ""; //$NON-NLS-1$
+        } else {
+            return Long.toString(i);
+        }
+    }
+
 	@Override
 	public boolean perform(AbstractBuild<?,?> build, Launcher launcher, BuildListener listener) {
 		listener.getLogger().println("Discard old builds..."); //$NON-NLS-1$
-		
+
 		Job<?, ?> job = (Job<?, ?>) build.getParent();
 		Run<?, ?> lsb = job.getLastSuccessfulBuild();
 		Run<?, ?> lstb = job.getLastStableBuild();
-		
+
 		// Reverse builds in order to avoid deleting all old builds at next build.
 		@SuppressWarnings("unchecked")
 		RunList<Run<?, ?>> builds = (RunList<Run<?, ?>>) job.getBuilds();
-		
+
 		try {
 			// identify latest builds to keep
 			int latestBuilds = 0;
@@ -139,7 +160,8 @@ public class DiscardBuildPublisher extends Recorder {
 			for (Run<?, ?> r : builds) {
 				if (isLatest) {
 					if ((numToKeep != -1 && latestBuilds >= numToKeep) ||
-							(daysToKeep != -1 && r.getTimestamp().before(cal))) {
+							(daysToKeep != -1 && r.getTimestamp().before(cal)) ||
+							(minLogFileSize != -1) || (maxLogFileSize != -1)) {
 						oldBuilds.add(0, intToString(builds.indexOf(r)));
 						isLatest = false;
 						continue;
@@ -156,7 +178,7 @@ public class DiscardBuildPublisher extends Recorder {
 			// advanced option
 			Run<?, ?> prev = null;
 			int prevIndex = 0;
-			
+
 			for (int i = 0; i < oldBuilds.size(); i++) {
                 int oldBuild = parse(oldBuilds.get(i));
                 for (Run<?, ?> r : builds) {
@@ -164,8 +186,14 @@ public class DiscardBuildPublisher extends Recorder {
                         if (r == lsb || r == lstb) {
                             // Always keep latest successful / stable builds
                             continue;
-                        } else if (intervalNumToKeep == -1 && intervalDaysToKeep == -1 && resultsToKeepOld.isEmpty()) {
+                        } else if (intervalNumToKeep == -1 && intervalDaysToKeep == -1 && resultsToKeepOld.isEmpty()
+                                && minLogFileSize == -1 && maxLogFileSize == -1) {
                             discardBuild(r, "it is too old and no advanced option is set", listener); //$NON-NLS-1$
+                        } else if (minLogFileSize != -1 || maxLogFileSize != -1) {
+                            long size = r.getLogFile().length();
+                            if (size < minLogFileSize || size > maxLogFileSize){
+                                discardBuild(r, "log file size=" + size + " which is too small or too big", listener);
+                            }
                         } else {
                             if (discardByStatus(r, resultsToKeepOld, listener)) {
                                 continue;
@@ -194,13 +222,13 @@ public class DiscardBuildPublisher extends Recorder {
 		} catch (IOException e) {
 			e.printStackTrace(listener.error("")); //$NON-NLS-1$
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Discard builds with status that doesn't meet the setting.
-	 * 
+	 *
 	 * @param history		build history to discard
 	 * @param resultSet		set of results to be kept
 	 * @param listener		build listener
@@ -215,10 +243,10 @@ public class DiscardBuildPublisher extends Recorder {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Discard old build result with logging.
-	 * 
+	 *
 	 * @param history	build history to discard
 	 * @param reason	reason to discard
 	 * @param listener	build listener
@@ -228,7 +256,7 @@ public class DiscardBuildPublisher extends Recorder {
 		listener.getLogger().printf("#%d is removed because %s\n", history.getNumber(), reason); //$NON-NLS-1$
 		history.delete();
 	}
-	
+
 	public String getDaysToKeep() {
 		return intToString(daysToKeep);
 	}
@@ -237,6 +265,14 @@ public class DiscardBuildPublisher extends Recorder {
 		return intToString(numToKeep);
 	}
 
+    public String getMinLogFileSize() {
+        return longToString(minLogFileSize);
+    }
+
+    public String getMaxLogFileSize() {
+        return longToString(maxLogFileSize);
+    }
+
 	public String getIntervalDaysToKeep() {
 		return intToString(intervalDaysToKeep);
 	}
@@ -244,43 +280,43 @@ public class DiscardBuildPublisher extends Recorder {
 	public String getIntervalNumToKeep() {
 		return intToString(intervalNumToKeep);
 	}
-	
+
 	public boolean isKeepSuccess() {
 		return resultsToKeep.contains(Result.SUCCESS);
 	}
-	
+
 	public boolean isKeepUnstable() {
 		return resultsToKeep.contains(Result.UNSTABLE);
 	}
-	
+
 	public boolean isKeepFailure() {
 		return resultsToKeep.contains(Result.FAILURE);
 	}
-	
+
 	public boolean isKeepNotBuilt() {
 		return resultsToKeep.contains(Result.NOT_BUILT);
 	}
-	
+
 	public boolean isKeepAborted() {
 		return resultsToKeep.contains(Result.ABORTED);
 	}
-	
+
 	public boolean isKeepSuccessOld() {
 		return resultsToKeepOld.contains(Result.SUCCESS);
 	}
-	
+
 	public boolean isKeepUnstableOld() {
 		return resultsToKeepOld.contains(Result.UNSTABLE);
 	}
-	
+
 	public boolean isKeepFailureOld() {
 		return resultsToKeepOld.contains(Result.FAILURE);
 	}
-	
+
 	public boolean isKeepNotBuiltOld() {
 		return resultsToKeepOld.contains(Result.NOT_BUILT);
 	}
-	
+
 	public boolean isKeepAbortedOld() {
 		return resultsToKeepOld.contains(Result.ABORTED);
 	}
@@ -293,7 +329,7 @@ public class DiscardBuildPublisher extends Recorder {
 	/**
 	 * Descriptor for {@link DiscardBuildPublisher}. Used as a singleton. The class is
 	 * marked as public so that it can be accessed from views.
-	 * 
+	 *
 	 * <p>
 	 * See
 	 * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
@@ -318,7 +354,7 @@ public class DiscardBuildPublisher extends Recorder {
 	public BuildStepMonitor getRequiredMonitorService() {
 		return BuildStepMonitor.BUILD;
 	}
-	
+
 	// for test
 	protected Calendar getCurrentCalendar() {
 		return Calendar.getInstance();

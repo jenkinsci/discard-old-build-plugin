@@ -80,7 +80,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"", "",
 				false, false, false, false, false,
 				"", "",
-				false, false, false, false, false));
+                "", "",
+                false, false, false, false, false));
 		
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 0; i < 20; i++) {
@@ -93,7 +94,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"3", "",
 				false, false, false, false, false,
 				"", "",
-				false, false, false, false, false));
+                "", "",
+                false, false, false, false, false));
 		
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 0; i < 6; i++) {
@@ -108,7 +110,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "5",
 				false, false, false, false, false,
-				"", "",
+                "", "",
+                "", "",
 				false, false, false, false, false));
 		
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
@@ -125,7 +128,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"", "",
 				false, true, false, true, true,		// unstable, not built, aborted
 				"", "",
-				false, false, false, false, false));
+                "", "",
+                false, false, false, false, false));
 		
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 0; i < 17; i++) {
@@ -140,7 +144,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "5",
 				false, false, true, false, false,		// failure
-				"", "",
+                "", "",
+                "", "",
 				false, false, true, false, false));		// failure
 		
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
@@ -166,12 +171,45 @@ public class DiscardBuildPublisherTest extends TestCase {
 		verify(buildList.get(18), times(1)).delete();
 		verify(buildList.get(19), times(1)).delete();
 	}
+
+    public void testPerformLogFileSize() throws Exception {
+        DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+                "", "5",
+                false, false, false, false, false,
+                "", "8192",
+                "", "3",
+                false, false, false, false, false));
+
+        publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+
+        verify(buildList.get(0), never()).delete(); // new build
+        verify(buildList.get(1), never()).delete(); // new build
+        verify(buildList.get(2), never()).delete(); // new build
+        verify(buildList.get(3), never()).delete(); // new build
+        verify(buildList.get(4), never()).delete(); // new build
+        verify(buildList.get(5), never()).delete();
+        verify(buildList.get(6), never()).delete();
+        verify(buildList.get(7), never()).delete(); // to keep
+        verify(buildList.get(8), never()).delete();
+        verify(buildList.get(9), never()).delete();
+        verify(buildList.get(10), never()).delete(); // to keep
+        verify(buildList.get(11), never()).delete();
+        verify(buildList.get(12), never()).delete();
+        verify(buildList.get(13), never()).delete(); // to keep
+        verify(buildList.get(14), never()).delete();
+        verify(buildList.get(15), never()).delete();
+        verify(buildList.get(16), never()).delete(); // to keep
+        verify(buildList.get(17), never()).delete();
+        verify(buildList.get(18), never()).delete();
+        verify(buildList.get(19), never()).delete(); // to keep
+    }
 	
 	public void testPerformIntervalDaysToKeep() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"3", "",
 				false, false, false, false, false,
-				"4", "",
+                "", "",
+                "4", "",
 				false, false, false, false, false));
 		
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
@@ -197,11 +235,12 @@ public class DiscardBuildPublisherTest extends TestCase {
 		verify(buildList.get(18), times(1)).delete();
 		verify(buildList.get(19), never()).delete(); // to keep
 	}
-	
+
 	public void testPerformIntervalNumToKeep() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "5",
 				false, false, false, false, false,
+                "", "",
 				"", "3",
 				false, false, false, false, false));
 		
@@ -233,6 +272,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "5",
 				false, false, false, false, false,
+                "", "",
 				"", "",
 				false, false, true, false, false));	// keep failure
 		

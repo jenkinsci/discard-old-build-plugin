@@ -5,7 +5,7 @@
   <f:entry title="${%NumToKeep}" field="numToKeep">
     <f:textbox />
   </f:entry>
-  
+
   <f:block>
     <table>
      <tr>
@@ -18,6 +18,13 @@
      </tr>
     </table>
   </f:block>
+
+  <f:entry title="${%MinLogFileSize}" field="minLogFileSize">
+    <f:textbox />
+  </f:entry>
+  <f:entry title="${%MaxLogFileSize}" field="maxLogFileSize">
+    <f:textbox />
+  </f:entry>
   
   <f:advanced>
   <f:section title="${ConfigurationForOldBuilds}">
