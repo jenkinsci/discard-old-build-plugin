@@ -12,6 +12,7 @@ This plugin provides a post-build step where you can discard old build results.
 * You can configures in more detail than the default 'Discard Old Build' function.
  * Other than # of builds and days, you can specify build status to discard/keep.
  * For older builds, you can configure interval to keep builds (once in a month, once in ten builds...).
+ * You can also delete builds which has logfile size smaller or larger than specified bytes
 
 
 TODO
