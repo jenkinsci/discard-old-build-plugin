@@ -1,52 +1,41 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-  <f:entry title="${%DaysToKeep}" field="daysToKeep">
-    <f:textbox />
-  </f:entry>
-  <f:entry title="${%NumToKeep}" field="numToKeep">
-    <f:textbox />
-  </f:entry>
+    <f:entry title="${%DaysToKeep}" field="daysToKeep">
+      <f:textbox />
+    </f:entry>
 
-  <f:block>
-    <table>
-     <tr>
-       <td>${%StatusToKeep}</td>
-       <td><f:checkbox title="${%Success}" name="keepSuccess" checked="${instance.keepSuccess}"/></td>
-       <td><f:checkbox title="${%Unstable}" name="keepUnstable" checked="${instance.keepUnstable}"/></td>
-       <td><f:checkbox title="${%Failure}" name="keepFailure" checked="${instance.keepFailure}"/></td>
-       <td><f:checkbox title="${%NotBuilt}" name="keepNotBuilt" checked="${instance.keepNotBuilt}"/></td>
-       <td><f:checkbox title="${%Aborted}" name="keepAborted" checked="${instance.keepAborted}"/></td>
-     </tr>
-    </table>
-  </f:block>
+    <f:entry title="${%NumToKeep}" field="numToKeep">
+      <f:textbox />
+    </f:entry>
 
-  <f:entry title="${%MinLogFileSize}" field="minLogFileSize">
-    <f:textbox />
-  </f:entry>
-  <f:entry title="${%MaxLogFileSize}" field="maxLogFileSize">
-    <f:textbox />
-  </f:entry>
-  
-  <f:advanced>
-  <f:section title="${ConfigurationForOldBuilds}">
-  <f:entry title="${%IntervalDaysToKeep}" field="intervalDaysToKeep">
-    <f:textbox />
-  </f:entry>
-  <f:entry title="${%IntervalNumToKeep}" field="intervalNumToKeep">
-    <f:textbox />
-  </f:entry>
-  
-  <f:block>
-    <table>
-     <tr>
-       <td>${%StatusToKeep}</td>
-       <td><f:checkbox title="${%Success}" name="keepSuccessOld" checked="${instance.keepSuccessOld}"/></td>
-       <td><f:checkbox title="${%Unstable}" name="keepUnstableOld" checked="${instance.keepUnstableOld}"/></td>
-       <td><f:checkbox title="${%Failure}" name="keepFailureOld" checked="${instance.keepFailureOld}"/></td>
-       <td><f:checkbox title="${%NotBuilt}" name="keepNotBuiltOld" checked="${instance.keepNotBuiltOld}"/></td>
-       <td><f:checkbox title="${%Aborted}" name="keepAbortedOld" checked="${instance.keepAbortedOld}"/></td>
-     </tr>
-    </table>
-  </f:block>
-  </f:section>
-  </f:advanced>
+      <f:entry title="${%IntervalDaysToKeep}" field="intervalDaysToKeep">
+          <f:textbox />
+      </f:entry>
+
+    <f:entry title="${%IntervalNumToKeep}" field="intervalNumToKeep">
+        <f:textbox />
+    </f:entry>
+
+    <f:block>
+        <table>
+        <tr>
+        <td>${%StatusToDiscard}</td>
+        <td><f:checkbox title="${%Success}" name="discardSuccess" checked="${instance.discardSuccess}"/></td>
+        <td><f:checkbox title="${%Unstable}" name="discardUnstable" checked="${instance.discardUnstable}"/></td>
+        <td><f:checkbox title="${%Failure}" name="discardFailure" checked="${instance.discardFailure}"/></td>
+        <td><f:checkbox title="${%NotBuilt}" name="discardNotBuilt" checked="${instance.discardNotBuilt}"/></td>
+        <td><f:checkbox title="${%Aborted}" name="discardAborted" checked="${instance.discardAborted}"/></td>
+        </tr>
+        </table>
+    </f:block>
+
+    <f:entry title="${%MinLogFileSize}" field="minLogFileSize">
+      <f:textbox />
+    </f:entry>
+    <f:entry title="${%MaxLogFileSize}" field="maxLogFileSize">
+       <f:textbox />
+    </f:entry>
+
+    <f:entry title="${%RegularExpression}" field="regexp">
+      <f:textbox />
+    </f:entry>
 </j:jelly>
