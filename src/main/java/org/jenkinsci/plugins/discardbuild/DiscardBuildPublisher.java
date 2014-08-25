@@ -171,57 +171,22 @@ public class DiscardBuildPublisher extends Recorder {
 		Job<?, ?> job = (Job<?, ?>) build.getParent();
 
 		ExtendRunList newList = new ExtendRunList();
-		int lastBuild;
-		int lastCompletedBuild;
-		int lastFailedBuild;
-		int lastStableBuild;
-		int lastSuccessfulBuild;
-		int lastUnstableBuild;
-		int lastUnsuccessfulBuild;
-		try {
-			lastBuild = job.getLastBuild().getNumber();
-		} catch (NullPointerException e){
-			lastBuild = -1;
-		}
-		try {
-			lastCompletedBuild = job.getLastCompletedBuild().getNumber();
-		} catch (NullPointerException e){
-			lastCompletedBuild = -1;
-		}
-		try {
-			lastFailedBuild = job.getLastFailedBuild().getNumber();
-		} catch (NullPointerException e){
-			lastFailedBuild = -1;
-		}
-		try {
-			lastStableBuild = job.getLastStableBuild().getNumber();
-		} catch (NullPointerException e){
-			lastStableBuild = -1;
-		}
-		try {
-			lastSuccessfulBuild = job.getLastSuccessfulBuild().getNumber();
-		} catch (NullPointerException e){
-			lastSuccessfulBuild = -1;
-		}
-		try {
-			lastUnstableBuild = job.getLastUnstableBuild().getNumber();
-		} catch (NullPointerException e){
-			lastUnstableBuild = -1;
-		}
-		try {
-			lastUnsuccessfulBuild = job.getLastSuccessfulBuild().getNumber();
-		} catch (NullPointerException e){
-			lastUnsuccessfulBuild = -1;
-		}
+        Run lastBuild = job.getLastBuild();
+        Run lastCompletedBuild = job.getLastCompletedBuild();
+        Run lastFailedBuild = job.getLastFailedBuild();
+        Run lastStableBuild = job.getLastStableBuild();
+        Run lastSuccessfulBuild = job.getLastSuccessfulBuild();
+        Run lastUnstableBuild = job.getLastUnstableBuild();
+        Run lastUnsuccessfulBuild = job.getLastSuccessfulBuild();
+
 		for (Run<?, ?> r: builds){
-			int num = r.getNumber();
-			if (lastBuild != -1 && num == lastBuild) continue;
-			if (lastCompletedBuild != -1 && num == lastCompletedBuild) continue;
-			if (lastFailedBuild != -1 && num == lastFailedBuild) continue;
-			if (lastStableBuild != -1 && num == lastStableBuild) continue;
-			if (lastSuccessfulBuild != -1 && num == lastSuccessfulBuild) continue;
-			if (lastUnstableBuild != -1 && num == lastUnstableBuild) continue;
-			if (lastUnsuccessfulBuild != -1 && num == lastUnsuccessfulBuild) continue;
+			if (r == lastBuild) continue;
+			if (r == lastCompletedBuild) continue;
+			if (r == lastFailedBuild) continue;
+			if (r == lastStableBuild) continue;
+			if (r == lastSuccessfulBuild) continue;
+			if (r == lastUnstableBuild) continue;
+			if (r == lastUnsuccessfulBuild) continue;
 			newList.add(r);
 		}
 
