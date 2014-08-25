@@ -38,6 +38,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void setUp() throws Exception {
 		// setUp build histories
+        buildList.add(createBuild(job, Result.SUCCESS, "20130120", true)); // #20
 		buildList.add(createBuild(job, Result.SUCCESS, "20130120")); // #20
 		buildList.add(createBuild(job, Result.FAILURE, "20130119")); // #19
 		buildList.add(createBuild(job, Result.SUCCESS, "20130118")); // #18
@@ -71,7 +72,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"", "", ""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 21; i++) {
 			verify(buildList.get(i), never()).delete();
 		}
 	}
@@ -83,10 +84,10 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"", "", ""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 7; i++) {
 			verify(buildList.get(i), never()).delete();
 		}
-		for (int i = 6; i < 20; i++) {
+		for (int i = 7; i < 21; i++) {
 			verify(buildList.get(i), times(1)).delete();
 		}
 	}
@@ -98,10 +99,10 @@ public class DiscardBuildPublisherTest extends TestCase {
                 "", "", ""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
-		for (int i = 0; i < 5; i++) {
+		for (int i = 1; i < 6; i++) {
 			verify(buildList.get(i), never()).delete();
 		}
-		for (int i = 5; i < 20; i++) {
+		for (int i = 6; i < 21; i++) {
 			verify(buildList.get(i), times(1)).delete();
 		}
 	}
@@ -113,10 +114,10 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"", "", ""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
-		for (int i = 0; i < 17; i++) {
+		for (int i = 1; i < 18; i++) {
 			verify(buildList.get(i), never()).delete();
 		}
-		for (int i = 17; i < 20; i++) {
+		for (int i = 18; i < 21; i++) {
 			verify(buildList.get(i), times(1)).delete();
 		}
 	}
@@ -129,26 +130,27 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
-		verify(buildList.get(0), never()).delete();
-		verify(buildList.get(1), times(1)).delete(); // new build
-		verify(buildList.get(2), never()).delete();
+        verify(buildList.get(0), never()).delete(); // building
+		verify(buildList.get(1), never()).delete();
+		verify(buildList.get(2), times(1)).delete(); // new build
 		verify(buildList.get(3), never()).delete();
-		verify(buildList.get(4), times(1)).delete(); // new build
-		verify(buildList.get(5), times(1)).delete();
+		verify(buildList.get(4), never()).delete();
+		verify(buildList.get(5), times(1)).delete(); // new build
 		verify(buildList.get(6), times(1)).delete();
 		verify(buildList.get(7), times(1)).delete();
 		verify(buildList.get(8), times(1)).delete();
-		verify(buildList.get(9), times(2)).delete(); // new build
+		verify(buildList.get(9), times(1)).delete();
 		verify(buildList.get(10), times(2)).delete(); // new build
-		verify(buildList.get(11), times(1)).delete();
+		verify(buildList.get(11), times(2)).delete(); // new build
 		verify(buildList.get(12), times(1)).delete();
 		verify(buildList.get(13), times(1)).delete();
 		verify(buildList.get(14), times(1)).delete();
 		verify(buildList.get(15), times(1)).delete();
-		verify(buildList.get(16), times(2)).delete(); // new build
-		verify(buildList.get(17), times(1)).delete();
+		verify(buildList.get(16), times(1)).delete();
+		verify(buildList.get(17), times(2)).delete(); // new build
 		verify(buildList.get(18), times(1)).delete();
 		verify(buildList.get(19), times(1)).delete();
+		verify(buildList.get(20), times(1)).delete();
 	}
 
 	public void testPerformIntervalDaysToKeep() throws Exception {
@@ -159,26 +161,27 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
-		verify(buildList.get(0), never()).delete(); // new build
-		verify(buildList.get(1), times(1)).delete(); // new build
+        verify(buildList.get(0), never()).delete(); // building
+		verify(buildList.get(1), never()).delete(); // new build
 		verify(buildList.get(2), times(1)).delete(); // new build
-		verify(buildList.get(3), never()).delete(); // new build
-		verify(buildList.get(4), times(1)).delete(); // new build
-		verify(buildList.get(5), times(1)).delete();
-		verify(buildList.get(6), never()).delete();
-		verify(buildList.get(7), times(1)).delete(); // to keep
-		verify(buildList.get(8), times(1)).delete();
-		verify(buildList.get(9), never()).delete();
-		verify(buildList.get(10), times(1)).delete(); // to keep
-		verify(buildList.get(11), times(1)).delete();
-		verify(buildList.get(12), never()).delete();
-		verify(buildList.get(13), times(1)).delete(); // to keep
-		verify(buildList.get(14), times(1)).delete();
-		verify(buildList.get(15), never()).delete();
-		verify(buildList.get(16), times(1)).delete(); // to keep
-		verify(buildList.get(17), times(1)).delete();
-		verify(buildList.get(18), never()).delete();
-		verify(buildList.get(19), times(1)).delete(); // to keep
+		verify(buildList.get(3), times(1)).delete(); // new build
+		verify(buildList.get(4), never()).delete(); // new build
+		verify(buildList.get(5), times(1)).delete(); // new build
+		verify(buildList.get(6), times(1)).delete();
+		verify(buildList.get(7), never()).delete();
+		verify(buildList.get(8), times(1)).delete(); // to keep
+		verify(buildList.get(9), times(1)).delete();
+		verify(buildList.get(10), never()).delete();
+		verify(buildList.get(11), times(1)).delete(); // to keep
+		verify(buildList.get(12), times(1)).delete();
+		verify(buildList.get(13), never()).delete();
+		verify(buildList.get(14), times(1)).delete(); // to keep
+		verify(buildList.get(15), times(1)).delete();
+		verify(buildList.get(16), never()).delete();
+		verify(buildList.get(17), times(1)).delete(); // to keep
+		verify(buildList.get(18), times(1)).delete();
+		verify(buildList.get(19), never()).delete();
+		verify(buildList.get(20), times(1)).delete(); // to keep
 	}
 
 	public void testPerformIntervalNumToKeep() throws Exception {
@@ -189,32 +192,38 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
-		verify(buildList.get(0), never()).delete(); // new build
-		verify(buildList.get(1), times(1)).delete(); // new build
+        verify(buildList.get(0), never()).delete(); // building
+		verify(buildList.get(1), never()).delete(); // new build
 		verify(buildList.get(2), times(1)).delete(); // new build
-		verify(buildList.get(3), never()).delete(); // new build
-		verify(buildList.get(4), times(1)).delete(); // new build
-		verify(buildList.get(5), times(1)).delete();
-		verify(buildList.get(6), never()).delete();
-		verify(buildList.get(7), times(1)).delete(); // to keep
-		verify(buildList.get(8), times(1)).delete();
-		verify(buildList.get(9), never()).delete();
-		verify(buildList.get(10), times(1)).delete(); // to keep
-		verify(buildList.get(11), times(1)).delete();
-		verify(buildList.get(12), never()).delete();
-		verify(buildList.get(13), times(1)).delete(); // to keep
-		verify(buildList.get(14), times(1)).delete();
-		verify(buildList.get(15), never()).delete();
-		verify(buildList.get(16), times(1)).delete(); // to keep
-		verify(buildList.get(17), times(1)).delete();
-		verify(buildList.get(18), never()).delete();
-		verify(buildList.get(19), times(1)).delete(); // to keep
+		verify(buildList.get(3), times(1)).delete(); // new build
+		verify(buildList.get(4), never()).delete(); // new build
+		verify(buildList.get(5), times(1)).delete(); // new build
+		verify(buildList.get(6), times(1)).delete();
+		verify(buildList.get(7), never()).delete();
+		verify(buildList.get(8), times(1)).delete(); // to keep
+		verify(buildList.get(9), times(1)).delete();
+		verify(buildList.get(10), never()).delete();
+		verify(buildList.get(11), times(1)).delete(); // to keep
+		verify(buildList.get(12), times(1)).delete();
+		verify(buildList.get(13), never()).delete();
+		verify(buildList.get(14), times(1)).delete(); // to keep
+		verify(buildList.get(15), times(1)).delete();
+		verify(buildList.get(16), never()).delete();
+		verify(buildList.get(17), times(1)).delete(); // to keep
+		verify(buildList.get(18), times(1)).delete();
+		verify(buildList.get(19), never()).delete();
+		verify(buildList.get(20), times(1)).delete(); // to keep
 	}
 
-	private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
+    private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
+        return createBuild(project, result, yyyymmdd, false);
+    }
+
+	private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd, boolean building) throws Exception {
 		FreeStyleBuild build = spy(new FreeStyleBuild(project));
 
 		when(build.getResult()).thenReturn(result);
+        when(build.isBuilding()).thenReturn(building);
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(sdf.parse(yyyymmdd));
 		when(build.getTimestamp()).thenReturn(cal);
