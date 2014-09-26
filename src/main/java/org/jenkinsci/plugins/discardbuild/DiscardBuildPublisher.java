@@ -452,7 +452,7 @@ public class DiscardBuildPublisher extends Recorder {
 	}
 
 	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.BUILD;
+		return BuildStepMonitor.NONE;
 	}
 
 	// for test
