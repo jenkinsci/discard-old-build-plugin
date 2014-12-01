@@ -64,6 +64,10 @@ public class DiscardBuildPublisher extends Recorder {
 	 * If not -1, old histories are kept by the specified interval builds.
 	 */
 	private final int intervalNumToKeep;
+    /**
+     * If true, will keep the last builds.
+     */
+    private final boolean keepLastBuilds;
 
 	/**
 	 * Regular expression.
@@ -83,7 +87,8 @@ public class DiscardBuildPublisher extends Recorder {
 			boolean discardAborted,
 			String minLogFileSize,
 			String maxLogFileSize,
-			String regexp
+			String regexp,
+            boolean keepLastBuilds
 			) {
 
 		this.daysToKeep = parse(daysToKeep);
@@ -102,6 +107,7 @@ public class DiscardBuildPublisher extends Recorder {
 		this.maxLogFileSize = parseLong(maxLogFileSize);
 
 		this.regexp = regexp;
+        this.keepLastBuilds = keepLastBuilds;
 	}
 
 	private static int parse(String p) {
@@ -193,6 +199,15 @@ public class DiscardBuildPublisher extends Recorder {
 
 		return newList.getNewList();
 	}
+
+    private ArrayList<Run<?, ?>> discardLastBuilds(AbstractBuild<?,?> build, BuildListener listener, RunList<Run<?, ?>> builds) {
+        Job<?, ?> job = (Job<?, ?>) build.getParent();
+        ExtendRunList newList = new ExtendRunList();
+        for (Run<?, ?> r: builds) {
+            newList.add(r);
+        }
+        return newList.getNewList();
+    }
 
 	private void deleteOldBuildsByRegexp(AbstractBuild<?,?> build, BuildListener listener, String regexp) {
 		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
@@ -322,8 +337,11 @@ public class DiscardBuildPublisher extends Recorder {
 		Job<?, ?> job = (Job<?, ?>) build.getParent();
 
 		builds = (RunList<Run<?, ?>>) job.getBuilds();
-		list = keepLastBuilds(build, listener, builds);
-		return list;
+        if (isKeepLastBuilds())
+            list = keepLastBuilds(build, listener, builds);
+        else
+            list = discardLastBuilds(build, listener, builds);
+        return list;
 	}
 
 	@Override
@@ -420,6 +438,8 @@ public class DiscardBuildPublisher extends Recorder {
 	public boolean isDiscardAborted() {
 		return resultsToDiscard.contains(Result.ABORTED);
 	}
+
+    public boolean isKeepLastBuilds() { return keepLastBuilds; }
 
 	@Override
 	public DescriptorImpl getDescriptor() {

@@ -34,8 +34,15 @@
     <f:entry title="${%MaxLogFileSize}" field="maxLogFileSize">
        <f:textbox />
     </f:entry>
-
     <f:entry title="${%RegularExpression}" field="regexp">
       <f:textbox />
     </f:entry>
+
+    <f:block>
+        <table>
+            <tr>
+                <td><f:checkbox title="${%KeepLastBuilds}" name="keepLastBuilds" checked="${instance.keepLastBuilds}"/></td>
+            </tr>
+        </table>
+    </f:block>
 </j:jelly>
