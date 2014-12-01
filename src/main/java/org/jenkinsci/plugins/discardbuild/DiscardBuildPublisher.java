@@ -30,147 +30,160 @@ import java.util.regex.Pattern;
  * or discarding buildswhich has too small or too big logfile size.
  *
  * @author tamagawahiroko
- *
  */
 public class DiscardBuildPublisher extends Recorder {
 
-	/**
-	 * If not -1, history is only kept up to this days.
-	 */
-	private final int daysToKeep;
-	/**
-	 * If not -1, only this number of build logs are kept.
-	 */
-	private final int numToKeep;
-	/**
-	 * Set of build results to be kept.
-	 */
-	private final Set<Result> resultsToDiscard;
+    /**
+     * If not -1, history is only kept up to this days.
+     */
+    private final int daysToKeep;
+    /**
+     * If not -1, only this number of build logs are kept.
+     */
+    private final int numToKeep;
+    /**
+     * Set of build results to be kept.
+     */
+    private final Set<Result> resultsToDiscard;
+    /**
+     * If not -1, history is only kept up to this logfile size.
+     */
+    private final long minLogFileSize;
+    /**
+     * If not -1, history is only kept lower than this logfile size.
+     */
+    private final long maxLogFileSize;
+    /**
+     * If not -1, old histories are kept by the specified interval days.
+     */
+    private final int intervalDaysToKeep;
+    /**
+     * If not -1, old histories are kept by the specified interval builds.
+     */
+    private final int intervalNumToKeep;
+    /**
+     * If true, will keep the last builds.
+     */
+    private final boolean keepLastBuilds;
+    /**
+     * Regular expression.
+     */
+    private final String regexp;
 
-	/**
-	 * If not -1, history is only kept up to this logfile size.
-	 */
-	private final long minLogFileSize;
-	/**
-	 * If not -1, history is only kept lower than this logfile size.
-	 */
-	private final long maxLogFileSize;
+    @DataBoundConstructor
+    public DiscardBuildPublisher(
+            String daysToKeep,
+            String intervalDaysToKeep,
+            String numToKeep,
+            String intervalNumToKeep,
+            boolean discardSuccess,
+            boolean discardUnstable,
+            boolean discardFailure,
+            boolean discardNotBuilt,
+            boolean discardAborted,
+            String minLogFileSize,
+            String maxLogFileSize,
+            String regexp,
+            boolean keepLastBuilds
+    ) {
 
-	/**
-	 * If not -1, old histories are kept by the specified interval days.
-	 */
-	private final int intervalDaysToKeep;
-	/**
-	 * If not -1, old histories are kept by the specified interval builds.
-	 */
-	private final int intervalNumToKeep;
+        this.daysToKeep = parse(daysToKeep);
+        this.intervalDaysToKeep = parse(intervalDaysToKeep);
+        this.numToKeep = parse(numToKeep);
+        this.intervalNumToKeep = parse(intervalNumToKeep);
 
-	/**
-	 * Regular expression.
-	 */
-	private final String regexp;
+        resultsToDiscard = new HashSet<Result>();
+        if (discardSuccess) {
+            resultsToDiscard.add(Result.SUCCESS);
+        }
+        if (discardUnstable) {
+            resultsToDiscard.add(Result.UNSTABLE);
+        }
+        if (discardFailure) {
+            resultsToDiscard.add(Result.FAILURE);
+        }
+        if (discardNotBuilt) {
+            resultsToDiscard.add(Result.NOT_BUILT);
+        }
+        if (discardAborted) {
+            resultsToDiscard.add(Result.ABORTED);
+        }
 
-	@DataBoundConstructor
-	public DiscardBuildPublisher(
-			String daysToKeep,
-			String intervalDaysToKeep,
-			String numToKeep,
-			String intervalNumToKeep,
-			boolean discardSuccess,
-			boolean discardUnstable,
-			boolean discardFailure,
-			boolean discardNotBuilt,
-			boolean discardAborted,
-			String minLogFileSize,
-			String maxLogFileSize,
-			String regexp
-			) {
+        this.minLogFileSize = parseLong(minLogFileSize);
+        this.maxLogFileSize = parseLong(maxLogFileSize);
 
-		this.daysToKeep = parse(daysToKeep);
-		this.intervalDaysToKeep = parse(intervalDaysToKeep);
-		this.numToKeep = parse(numToKeep);
-		this.intervalNumToKeep = parse(intervalNumToKeep);
+        this.regexp = regexp;
+        this.keepLastBuilds = keepLastBuilds;
+    }
 
-		resultsToDiscard = new HashSet<Result>();
-		if (discardSuccess) { resultsToDiscard.add(Result.SUCCESS); }
-		if (discardUnstable) { resultsToDiscard.add(Result.UNSTABLE); }
-		if (discardFailure) { resultsToDiscard.add(Result.FAILURE); }
-		if (discardNotBuilt) { resultsToDiscard.add(Result.NOT_BUILT); }
-		if (discardAborted) { resultsToDiscard.add(Result.ABORTED); }
+    private static int parse(String p) {
+        if (p == null) return -1;
+        try {
+            return Integer.parseInt(p);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
 
-		this.minLogFileSize = parseLong(minLogFileSize);
-		this.maxLogFileSize = parseLong(maxLogFileSize);
+    private static long parseLong(String p) {
+        if (p == null) return -1;
+        try {
+            return Long.parseLong(p);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
 
-		this.regexp = regexp;
-	}
-
-	private static int parse(String p) {
-		if(p==null)     return -1;
-		try {
-			return Integer.parseInt(p);
-		} catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-
-	private static long parseLong(String p) {
-		if(p==null)     return -1;
-		try {
-			return Long.parseLong(p);
-		} catch (NumberFormatException e) {
-			return -1;
-		}
-	}
-
-	private static boolean isRegexpMatch(File logFile, String regexp) throws IOException, InterruptedException {
-		if (regexp == null) return false;
-		String line;
-		Pattern pattern = Pattern.compile(regexp);
-		BufferedReader reader = new BufferedReader(new FileReader(logFile));
-		while ((line = reader.readLine()) != null){
-			Matcher matcher = pattern.matcher(line);
-			if (matcher.find()) return true;
-		}
-		return false;
-	}
+    private static boolean isRegexpMatch(File logFile, String regexp) throws IOException, InterruptedException {
+        if (regexp == null) return false;
+        String line;
+        Pattern pattern = Pattern.compile(regexp);
+        BufferedReader reader = new BufferedReader(new FileReader(logFile));
+        while ((line = reader.readLine()) != null) {
+            Matcher matcher = pattern.matcher(line);
+            if (matcher.find()) return true;
+        }
+        return false;
+    }
 
     private static String intToString(int i) {
-    	if (i == -1) {
-    		return ""; //$NON-NLS-1$
-    	} else {
-    		return Integer.toString(i);
-    	}
+        if (i == -1) {
+            return ""; //$NON-NLS-1$
+        } else {
+            return Integer.toString(i);
+        }
     }
 
     private static String longToString(long i) {
-	    if (i == -1) {
+        if (i == -1) {
             return ""; //$NON-NLS-1$
         } else {
             return Long.toString(i);
         }
     }
 
-	class ExtendRunList extends RunList<Run<?, ?>> {
-		private ArrayList<Run<?, ?>> newList;
-		ExtendRunList() {
-			newList = new ArrayList<Run<?, ?>>();
-		}
+    class ExtendRunList extends RunList<Run<?, ?>> {
+        private ArrayList<Run<?, ?>> newList;
 
-		ArrayList<Run<?, ?>> getNewList() {
-			return newList;
-		}
+        ExtendRunList() {
+            newList = new ArrayList<Run<?, ?>>();
+        }
 
-		@Override
-		public boolean add(Run<?, ?> run) {
-			newList.add(run);
-			return true;
-		}
-	}
+        ArrayList<Run<?, ?>> getNewList() {
+            return newList;
+        }
 
-	private ArrayList<Run<?, ?>> keepLastBuilds(AbstractBuild<?,?> build, BuildListener listener, RunList<Run<?, ?>> builds) {
-		Job<?, ?> job = (Job<?, ?>) build.getParent();
+        @Override
+        public boolean add(Run<?, ?> run) {
+            newList.add(run);
+            return true;
+        }
+    }
 
-		ExtendRunList newList = new ExtendRunList();
+    private ArrayList<Run<?, ?>> keepLastBuilds(AbstractBuild<?, ?> build, BuildListener listener, RunList<Run<?, ?>> builds) {
+        Job<?, ?> job = (Job<?, ?>) build.getParent();
+
+        ExtendRunList newList = new ExtendRunList();
         Run lastBuild = job.getLastBuild();
         Run lastCompletedBuild = job.getLastCompletedBuild();
         Run lastFailedBuild = job.getLastFailedBuild();
@@ -179,207 +192,219 @@ public class DiscardBuildPublisher extends Recorder {
         Run lastUnstableBuild = job.getLastUnstableBuild();
         Run lastUnsuccessfulBuild = job.getLastSuccessfulBuild();
 
-		for (Run<?, ?> r: builds){
+        for (Run<?, ?> r : builds) {
             if (r.isBuilding()) continue;
-			if (r == lastBuild) continue;
-			if (r == lastCompletedBuild) continue;
-			if (r == lastFailedBuild) continue;
-			if (r == lastStableBuild) continue;
-			if (r == lastSuccessfulBuild) continue;
-			if (r == lastUnstableBuild) continue;
-			if (r == lastUnsuccessfulBuild) continue;
-			newList.add(r);
-		}
+            if (r == lastBuild) continue;
+            if (r == lastCompletedBuild) continue;
+            if (r == lastFailedBuild) continue;
+            if (r == lastStableBuild) continue;
+            if (r == lastSuccessfulBuild) continue;
+            if (r == lastUnstableBuild) continue;
+            if (r == lastUnsuccessfulBuild) continue;
+            newList.add(r);
+        }
 
-		return newList.getNewList();
-	}
+        return newList.getNewList();
+    }
 
-	private void deleteOldBuildsByRegexp(AbstractBuild<?,?> build, BuildListener listener, String regexp) {
-		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-		if (regexp == null || regexp.equals("")) return;
-		try {
-			for (Run<?, ?> r : list) {
-				if (isRegexpMatch(r.getLogFile(), regexp)) {
-					discardBuild(r, "match regular expression", listener);
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+    private ArrayList<Run<?, ?>> discardLastBuilds(AbstractBuild<?, ?> build, BuildListener listener, RunList<Run<?, ?>> builds) {
+        Job<?, ?> job = (Job<?, ?>) build.getParent();
+        ExtendRunList newList = new ExtendRunList();
+        for (Run<?, ?> r : builds) {
+            newList.add(r);
+        }
+        return newList.getNewList();
+    }
 
-	private void deleteOldBuildsByLogfileSize(AbstractBuild<?,?> build, BuildListener listener, long minLogFileSize,
-	                                          long maxLogFileSize) {
-		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-		try {
-			if (minLogFileSize != -1 || maxLogFileSize != -1) {
-				for (Run<?, ?> r : list) {
-					long size = r.getLogFile().length();
-					if (minLogFileSize == -1 && size > maxLogFileSize)
-						discardBuild(r, "log file size=" + size + " which is too big", listener);
-					else if (maxLogFileSize == -1 && size < minLogFileSize)
-						discardBuild(r, "log file size=" + size + " which is too small", listener);
-					else if (minLogFileSize != -1 && maxLogFileSize != -1 && (size < minLogFileSize || size > maxLogFileSize)){
-						discardBuild(r, "log file size=" + size + " which is too small or too big", listener);
-					}
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    private void deleteOldBuildsByRegexp(AbstractBuild<?, ?> build, BuildListener listener, String regexp) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        if (regexp == null || regexp.equals("")) return;
+        try {
+            for (Run<?, ?> r : list) {
+                if (isRegexpMatch(r.getLogFile(), regexp)) {
+                    discardBuild(r, "match regular expression", listener);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
-	private void deleteOldBuildsByDays(AbstractBuild<?,?> build, BuildListener listener, int daysToKeep) {
-		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-		if (daysToKeep == -1) return;
-		try {
-			Calendar cal = getCurrentCalendar();
-			cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
-			for (Run<?, ?> r : list) {
-				if (r.getTimestamp().before(cal)) {
-					discardBuild(r, "it is older than daysToKeep", listener); //$NON-NLS-1$
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace(listener.error("")); //$NON-NLS-1$
-		}
-	}
+    private void deleteOldBuildsByLogfileSize(AbstractBuild<?, ?> build, BuildListener listener, long minLogFileSize,
+                                              long maxLogFileSize) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        try {
+            if (minLogFileSize != -1 || maxLogFileSize != -1) {
+                for (Run<?, ?> r : list) {
+                    long size = r.getLogFile().length();
+                    if (minLogFileSize == -1 && size > maxLogFileSize)
+                        discardBuild(r, "log file size=" + size + " which is too big", listener);
+                    else if (maxLogFileSize == -1 && size < minLogFileSize)
+                        discardBuild(r, "log file size=" + size + " which is too small", listener);
+                    else if (minLogFileSize != -1 && maxLogFileSize != -1 && (size < minLogFileSize || size > maxLogFileSize)) {
+                        discardBuild(r, "log file size=" + size + " which is too small or too big", listener);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	private void deleteOldBuildsByIntervalDays(AbstractBuild<?,?> build, BuildListener listener, int intervalDaysToKeep) {
-		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-		if (intervalDaysToKeep == -1) return;
-		try {
-			Run<?, ?> prev = null;
+    private void deleteOldBuildsByDays(AbstractBuild<?, ?> build, BuildListener listener, int daysToKeep) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        if (daysToKeep == -1) return;
+        try {
+            Calendar cal = getCurrentCalendar();
+            cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
+            for (Run<?, ?> r : list) {
+                if (r.getTimestamp().before(cal)) {
+                    discardBuild(r, "it is older than daysToKeep", listener); //$NON-NLS-1$
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error("")); //$NON-NLS-1$
+        }
+    }
 
-			for (Run<?, ?> r : list) {
-				if (prev == null) {
-					prev = r; // The first build is the latest build
-					continue;
-				} else {
-					Calendar prevCal = getCurrentCalendar();
-					prevCal.setTime(prev.getTimestamp().getTime());
-					prevCal.add(Calendar.DAY_OF_YEAR, -intervalDaysToKeep);
-					if (r.getTimestamp().after(prevCal)) {
-						discardBuild(r, "it is old and within build days interval", listener); //$NON-NLS-1$
-						continue;
-					}
-					prev = r;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace(listener.error("")); //$NON-NLS-1$
-		}
-	}
+    private void deleteOldBuildsByIntervalDays(AbstractBuild<?, ?> build, BuildListener listener, int intervalDaysToKeep) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        if (intervalDaysToKeep == -1) return;
+        try {
+            Run<?, ?> prev = null;
 
-	private void deleteOldBuildsByNum(AbstractBuild<?,?> build, BuildListener listener, int numToKeep) {
-		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-		if (numToKeep == -1) return;
-		int index = 0;
-		try {
-			for (Run<?, ?> r : list) {
-				if (index >= numToKeep)
-					discardBuild(r, "old than numToKeep", listener);
-				index++;
-			}
-		} catch (IOException e) {
-			e.printStackTrace(listener.error(""));
-		}
-	}
+            for (Run<?, ?> r : list) {
+                if (prev == null) {
+                    prev = r; // The first build is the latest build
+                    continue;
+                } else {
+                    Calendar prevCal = getCurrentCalendar();
+                    prevCal.setTime(prev.getTimestamp().getTime());
+                    prevCal.add(Calendar.DAY_OF_YEAR, -intervalDaysToKeep);
+                    if (r.getTimestamp().after(prevCal)) {
+                        discardBuild(r, "it is old and within build days interval", listener); //$NON-NLS-1$
+                        continue;
+                    }
+                    prev = r;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error("")); //$NON-NLS-1$
+        }
+    }
 
-	private void deleteOldBuildsByIntervalNum(AbstractBuild<?,?> build, BuildListener listener, int intervalNumToKeep) {
-		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-		if (intervalNumToKeep == -1) return;
-		int index = 0;
-		try {
-			if (intervalNumToKeep == 1) intervalNumToKeep = 2;
-			for (Run<?, ?> r: list) {
-				if ((index%intervalNumToKeep) != 0){
-					discardBuild(r, "it is old and within build number interval", listener);
-				}
-				index++;
-			}
-		} catch (IOException e) {
-			e.printStackTrace(listener.error(""));
-		}
-	}
+    private void deleteOldBuildsByNum(AbstractBuild<?, ?> build, BuildListener listener, int numToKeep) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        if (numToKeep == -1) return;
+        int index = 0;
+        try {
+            for (Run<?, ?> r : list) {
+                if (index >= numToKeep)
+                    discardBuild(r, "old than numToKeep", listener);
+                index++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error(""));
+        }
+    }
 
-	private void deleteOldBuildsByStatus(AbstractBuild<?,?> build, BuildListener listener, Set<Result> resultsToDiscard) {
-		ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-		try {
-			for (Run<?, ?> r : list) {
-				discardByStatus(r, resultsToDiscard, listener);
-			}
-		} catch (IOException e) {
-			e.printStackTrace(listener.error(""));
-		}
-	}
+    private void deleteOldBuildsByIntervalNum(AbstractBuild<?, ?> build, BuildListener listener, int intervalNumToKeep) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        if (intervalNumToKeep == -1) return;
+        int index = 0;
+        try {
+            if (intervalNumToKeep == 1) intervalNumToKeep = 2;
+            for (Run<?, ?> r : list) {
+                if ((index % intervalNumToKeep) != 0) {
+                    discardBuild(r, "it is old and within build number interval", listener);
+                }
+                index++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error(""));
+        }
+    }
 
-	private ArrayList<Run<?, ?>> updateBuildsList(AbstractBuild<?,?> build, BuildListener listener) {
-		RunList<Run<?, ?>> builds = new RunList<Run<?, ?>>();
-		ArrayList<Run<?, ?>> list = new ArrayList<Run<?, ?>>();
-		Job<?, ?> job = (Job<?, ?>) build.getParent();
+    private void deleteOldBuildsByStatus(AbstractBuild<?, ?> build, BuildListener listener, Set<Result> resultsToDiscard) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        try {
+            for (Run<?, ?> r : list) {
+                discardByStatus(r, resultsToDiscard, listener);
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error(""));
+        }
+    }
 
-		builds = (RunList<Run<?, ?>>) job.getBuilds();
-		list = keepLastBuilds(build, listener, builds);
-		return list;
-	}
+    private ArrayList<Run<?, ?>> updateBuildsList(AbstractBuild<?, ?> build, BuildListener listener) {
+        RunList<Run<?, ?>> builds = new RunList<Run<?, ?>>();
+        ArrayList<Run<?, ?>> list = new ArrayList<Run<?, ?>>();
+        Job<?, ?> job = (Job<?, ?>) build.getParent();
 
-	@Override
-	public boolean perform(AbstractBuild<?,?> build, Launcher launcher, BuildListener listener) {
-		listener.getLogger().println("Discard old builds..."); //$NON-NLS-1$
+        builds = (RunList<Run<?, ?>>) job.getBuilds();
+        if (isKeepLastBuilds())
+            list = keepLastBuilds(build, listener, builds);
+        else
+            list = discardLastBuilds(build, listener, builds);
+        return list;
+    }
 
-		// priority influence discard results, TODO: dynamic adjust priority on UI
-		deleteOldBuildsByDays(build, listener, daysToKeep);
-		deleteOldBuildsByNum(build, listener, numToKeep);
-		deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
-		deleteOldBuildsByIntervalNum(build, listener, intervalNumToKeep);
-		deleteOldBuildsByStatus(build, listener, resultsToDiscard);
-		deleteOldBuildsByLogfileSize(build, listener, minLogFileSize, maxLogFileSize);
-		deleteOldBuildsByRegexp(build, listener, regexp);
+    @Override
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+        listener.getLogger().println("Discard old builds..."); //$NON-NLS-1$
 
-		return true;
-	}
+        // priority influence discard results, TODO: dynamic adjust priority on UI
+        deleteOldBuildsByDays(build, listener, daysToKeep);
+        deleteOldBuildsByNum(build, listener, numToKeep);
+        deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
+        deleteOldBuildsByIntervalNum(build, listener, intervalNumToKeep);
+        deleteOldBuildsByStatus(build, listener, resultsToDiscard);
+        deleteOldBuildsByLogfileSize(build, listener, minLogFileSize, maxLogFileSize);
+        deleteOldBuildsByRegexp(build, listener, regexp);
 
-	/**
-	 * Discard builds with status that doesn't meet the setting.
-	 *
-	 * @param history		build history to discard
-	 * @param resultSet		set of results to be discard
-	 * @param listener		build listener
-	 * @return true if the build is discarded.
-	 * @throws IOException	when deletion failed
-	 */
-	private boolean discardByStatus(Run<?, ?> history, Set<Result> resultSet, BuildListener listener) throws IOException {
-		if (!resultSet.isEmpty() && resultSet.contains(history.getResult())) {
-			discardBuild(history, String.format("status %s is not to be kept", history.getResult()), listener); //$NON-NLS-1$
-			return true;
-		} else {
-			return false;
-		}
-	}
+        return true;
+    }
 
-	/**
-	 * Discard old build result with logging.
-	 *
-	 * @param history	build history to discard
-	 * @param reason	reason to discard
-	 * @param listener	build listener
-	 * @throws IOException	when deletion failed
-	 */
-	private void discardBuild(Run<?, ?> history, String reason, BuildListener listener) throws IOException {
-		listener.getLogger().printf("#%d is removed because %s\n", history.getNumber(), reason); //$NON-NLS-1$
-		history.delete();
-	}
+    /**
+     * Discard builds with status that doesn't meet the setting.
+     *
+     * @param history   build history to discard
+     * @param resultSet set of results to be discard
+     * @param listener  build listener
+     * @return true if the build is discarded.
+     * @throws IOException when deletion failed
+     */
+    private boolean discardByStatus(Run<?, ?> history, Set<Result> resultSet, BuildListener listener) throws IOException {
+        if (!resultSet.isEmpty() && resultSet.contains(history.getResult())) {
+            discardBuild(history, String.format("status %s is not to be kept", history.getResult()), listener); //$NON-NLS-1$
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	public String getDaysToKeep() {
-		return intToString(daysToKeep);
-	}
+    /**
+     * Discard old build result with logging.
+     *
+     * @param history  build history to discard
+     * @param reason   reason to discard
+     * @param listener build listener
+     * @throws IOException when deletion failed
+     */
+    private void discardBuild(Run<?, ?> history, String reason, BuildListener listener) throws IOException {
+        listener.getLogger().printf("#%d is removed because %s\n", history.getNumber(), reason); //$NON-NLS-1$
+        history.delete();
+    }
 
-	public String getNumToKeep() {
-		return intToString(numToKeep);
-	}
+    public String getDaysToKeep() {
+        return intToString(daysToKeep);
+    }
+
+    public String getNumToKeep() {
+        return intToString(numToKeep);
+    }
 
     public String getMinLogFileSize() {
         return longToString(minLogFileSize);
@@ -389,74 +414,78 @@ public class DiscardBuildPublisher extends Recorder {
         return longToString(maxLogFileSize);
     }
 
-	public String getIntervalDaysToKeep() {
-		return intToString(intervalDaysToKeep);
-	}
+    public String getIntervalDaysToKeep() {
+        return intToString(intervalDaysToKeep);
+    }
 
-	public String getRegexp() {
-		return regexp;
-	}
+    public String getRegexp() {
+        return regexp;
+    }
 
-	public String getIntervalNumToKeep() {
-		return intToString(intervalNumToKeep);
-	}
+    public String getIntervalNumToKeep() {
+        return intToString(intervalNumToKeep);
+    }
 
-	public boolean isDiscardSuccess() {
-		return resultsToDiscard.contains(Result.SUCCESS);
-	}
+    public boolean isDiscardSuccess() {
+        return resultsToDiscard.contains(Result.SUCCESS);
+    }
 
-	public boolean isDiscardUnstable() {
-		return resultsToDiscard.contains(Result.UNSTABLE);
-	}
+    public boolean isDiscardUnstable() {
+        return resultsToDiscard.contains(Result.UNSTABLE);
+    }
 
-	public boolean isDiscardFailure() {
-		return resultsToDiscard.contains(Result.FAILURE);
-	}
+    public boolean isDiscardFailure() {
+        return resultsToDiscard.contains(Result.FAILURE);
+    }
 
-	public boolean isDiscardNotBuilt() {
-		return resultsToDiscard.contains(Result.NOT_BUILT);
-	}
+    public boolean isDiscardNotBuilt() {
+        return resultsToDiscard.contains(Result.NOT_BUILT);
+    }
 
-	public boolean isDiscardAborted() {
-		return resultsToDiscard.contains(Result.ABORTED);
-	}
+    public boolean isDiscardAborted() {
+        return resultsToDiscard.contains(Result.ABORTED);
+    }
 
-	@Override
-	public DescriptorImpl getDescriptor() {
-		return (DescriptorImpl) super.getDescriptor();
-	}
+    public boolean isKeepLastBuilds() {
+        return keepLastBuilds;
+    }
 
-	/**
-	 * Descriptor for {@link DiscardBuildPublisher}. Used as a singleton. The class is
-	 * marked as public so that it can be accessed from views.
-	 *
-	 * <p>
-	 * See
-	 * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
-	 * for the actual HTML fragment for the configuration screen.
-	 */
-	@Extension
-	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+    @Override
+    public DescriptorImpl getDescriptor() {
+        return (DescriptorImpl) super.getDescriptor();
+    }
 
-		@SuppressWarnings("rawtypes")
-		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-			return true;
-		}
+    /**
+     * Descriptor for {@link DiscardBuildPublisher}. Used as a singleton. The class is
+     * marked as public so that it can be accessed from views.
+     * <p/>
+     * <p/>
+     * See
+     * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
+     * for the actual HTML fragment for the configuration screen.
+     */
+    @Extension
+    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 
-		/**
-		 * This human readable name is used in the configuration screen.
-		 */
-		public String getDisplayName() {
-			return Messages.DiscardHistoryBuilder_description();
-		}
-	}
+        @SuppressWarnings("rawtypes")
+        public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+            return true;
+        }
 
-	public BuildStepMonitor getRequiredMonitorService() {
-		return BuildStepMonitor.NONE;
-	}
+        /**
+         * This human readable name is used in the configuration screen.
+         */
+        public String getDisplayName() {
+            return Messages.DiscardHistoryBuilder_description();
+        }
+    }
 
-	// for test
-	protected Calendar getCurrentCalendar() {
-		return Calendar.getInstance();
-	}
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.NONE;
+    }
+
+    // for test
+    protected Calendar getCurrentCalendar() {
+        return Calendar.getInstance();
+    }
 }
