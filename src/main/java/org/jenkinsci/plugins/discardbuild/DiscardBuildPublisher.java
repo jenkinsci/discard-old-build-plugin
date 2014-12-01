@@ -45,7 +45,6 @@ public class DiscardBuildPublisher extends Recorder {
      * Set of build results to be kept.
      */
     private final Set<Result> resultsToDiscard;
-
     /**
      * If not -1, history is only kept up to this logfile size.
      */
@@ -54,7 +53,6 @@ public class DiscardBuildPublisher extends Recorder {
      * If not -1, history is only kept lower than this logfile size.
      */
     private final long maxLogFileSize;
-
     /**
      * If not -1, old histories are kept by the specified interval days.
      */
