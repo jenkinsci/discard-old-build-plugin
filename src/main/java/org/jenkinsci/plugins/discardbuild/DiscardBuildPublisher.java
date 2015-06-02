@@ -11,6 +11,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.RunList;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.BufferedReader;
@@ -27,7 +28,7 @@ import java.util.regex.Pattern;
 /**
  * Builder that discards old build histories according to more detail configurations than the core function.
  * This enables discarding builds by build status or keeping older builds for every N builds / N days
- * or discarding buildswhich has too small or too big logfile size.
+ * or discarding builds which has too small or too big logfile size.
  *
  * @author tamagawahiroko
  */
@@ -41,6 +42,10 @@ public class DiscardBuildPublisher extends Recorder {
      * If not -1, only this number of build logs are kept.
      */
     private final int numToKeep;
+    /**
+     * If not -1, only this number of build logs marked keep build forever are kept.
+     */
+    private final int numForeverToKeep;
     /**
      * Set of build results to be kept.
      */
@@ -75,6 +80,7 @@ public class DiscardBuildPublisher extends Recorder {
             String daysToKeep,
             String intervalDaysToKeep,
             String numToKeep,
+            String numForeverToKeep,
             String intervalNumToKeep,
             boolean discardSuccess,
             boolean discardUnstable,
@@ -90,6 +96,7 @@ public class DiscardBuildPublisher extends Recorder {
         this.daysToKeep = parse(daysToKeep);
         this.intervalDaysToKeep = parse(intervalDaysToKeep);
         this.numToKeep = parse(numToKeep);
+        this.numForeverToKeep = parse(numForeverToKeep);
         this.intervalNumToKeep = parse(intervalNumToKeep);
 
         resultsToDiscard = new HashSet<Result>();
@@ -208,7 +215,6 @@ public class DiscardBuildPublisher extends Recorder {
     }
 
     private ArrayList<Run<?, ?>> discardLastBuilds(AbstractBuild<?, ?> build, BuildListener listener, RunList<Run<?, ?>> builds) {
-        Job<?, ?> job = (Job<?, ?>) build.getParent();
         ExtendRunList newList = new ExtendRunList();
         for (Run<?, ?> r : builds) {
             newList.add(r);
@@ -301,9 +307,42 @@ public class DiscardBuildPublisher extends Recorder {
         int index = 0;
         try {
             for (Run<?, ?> r : list) {
-                if (index >= numToKeep)
-                    discardBuild(r, "old than numToKeep", listener);
-                index++;
+            	boolean keeplog;
+            	try {
+            		keeplog = r.isKeepLog();
+            	} catch(NullPointerException e) {
+            		keeplog = false;
+            	}
+                if (!keeplog) {
+	                if (index >= numToKeep)
+	                    discardBuild(r, "old than numToKeep", listener);
+	                index++;
+            	}
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error(""));
+        }
+    }
+    
+    private void deleteOldForeverBuildsByNum(AbstractBuild<?, ?> build, BuildListener listener, int numForeverToKeep) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        if (numForeverToKeep == -1) return;
+        int index = 0;
+        try {
+            for (Run<?, ?> r : list) {
+            	boolean keeplog;
+            	try {
+            		keeplog = r.isKeepLog();
+            	} catch(NullPointerException e) {
+            		keeplog = false;
+            	}
+                if (keeplog) {
+                    if (index >= numForeverToKeep) {
+                        r.keepLog(false);
+                        discardBuild(r, "old than numForeverToKeep", listener);
+                    }
+                    index++;
+                }
             }
         } catch (IOException e) {
             e.printStackTrace(listener.error(""));
@@ -358,6 +397,7 @@ public class DiscardBuildPublisher extends Recorder {
         // priority influence discard results, TODO: dynamic adjust priority on UI
         deleteOldBuildsByDays(build, listener, daysToKeep);
         deleteOldBuildsByNum(build, listener, numToKeep);
+        deleteOldForeverBuildsByNum(build, listener, numForeverToKeep);
         deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
         deleteOldBuildsByIntervalNum(build, listener, intervalNumToKeep);
         deleteOldBuildsByStatus(build, listener, resultsToDiscard);
@@ -404,6 +444,10 @@ public class DiscardBuildPublisher extends Recorder {
 
     public String getNumToKeep() {
         return intToString(numToKeep);
+    }
+    
+    public String getNumForeverToKeep() {
+        return intToString(numForeverToKeep);
     }
 
     public String getMinLogFileSize() {

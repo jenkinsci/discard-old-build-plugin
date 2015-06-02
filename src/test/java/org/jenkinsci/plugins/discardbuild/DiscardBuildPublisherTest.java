@@ -7,6 +7,7 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.util.RunList;
 import junit.framework.TestCase;
+
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -38,7 +39,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void setUp() throws Exception {
 		// setUp build histories
-        buildList.add(createBuild(job, Result.SUCCESS, "20130120", true)); // #20
+        buildList.add(createBuild(job, Result.SUCCESS, "20130120", true)); // #21
 		buildList.add(createBuild(job, Result.SUCCESS, "20130120")); // #20
 		buildList.add(createBuild(job, Result.FAILURE, "20130119")); // #19
 		buildList.add(createBuild(job, Result.SUCCESS, "20130118")); // #18
@@ -67,7 +68,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void testPerformNoCondition() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"", "", "", "",
+				"", "", "", "", "",
 				false, false, false, false, false,
 				"", "", "", true));
 
@@ -79,7 +80,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void testPerformDaysToKeep() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"3", "", "", "",
+				"3", "", "", "", "",
 				false, false, false, false, false,
 				"", "", "", true));
 
@@ -94,7 +95,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void testPerformNumToKeep() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"", "","5", "",
+				"", "","5", "", "",
 				false, false, false, false, false,
                 "", "", "", true));
 
@@ -106,10 +107,26 @@ public class DiscardBuildPublisherTest extends TestCase {
 			verify(buildList.get(i), times(1)).delete();
 		}
 	}
+	
+	// TODO: add build at top marked keep forever to be removed. Keeplog is not in builds by default
+	public void testPerformNumForeverToKeep() throws Exception {
+		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+				"", "","", "0", "",
+				false, false, false, false, false,
+                "", "", "", true));
+
+		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+		for (int i = 1; i < 6; i++) {
+			verify(buildList.get(i), never()).delete();
+		}
+		for (int i = 6; i < 21; i++) {
+			verify(buildList.get(i), never()).delete();
+		}
+	}
 
 	public void testPerformStatusToDiscard() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"", "","", "",
+				"", "","", "", "",
 				false, true, false, true, true,		// unstable, not built, aborted
 				"", "", "", true));
 
@@ -124,7 +141,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void testPerformNumAndStatus() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"", "","5","",
+				"", "","5","", "",
 				false, false, true, false, false,		// failure
                 "", "", "", true));		// failure
 
@@ -155,7 +172,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void testPerformIntervalDaysToKeep() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"", "3", "", "",
+				"", "3", "", "", "",
 				false, false, false, false, false,
                 "", "", "", true));
 
@@ -186,7 +203,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void testPerformIntervalNumToKeep() throws Exception {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"", "", "", "3",
+				"", "", "", "", "3",
 				false, false, false, false, false,
                 "", "", "", true));
 
@@ -235,7 +252,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 	private DiscardBuildPublisher getPublisher(DiscardBuildPublisher publisher) throws Exception {
 		DiscardBuildPublisher spy = spy(publisher);
 
-		when(spy.getCurrentCalendar()).thenAnswer(new Answer() {
+		when(spy.getCurrentCalendar()).thenAnswer(new Answer<Object>() {
 		     public Object answer(InvocationOnMock invocation) {
 		    	 Calendar cal = Calendar.getInstance();
 		 		try {
@@ -249,9 +266,9 @@ public class DiscardBuildPublisherTest extends TestCase {
 		return spy;
 	}
 
-	private Calendar createCalendar() throws Exception {
+	/*private Calendar createCalendar() throws Exception {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(sdf.parse("20130120"));
 		return cal;
-	}
+	}*/
 }

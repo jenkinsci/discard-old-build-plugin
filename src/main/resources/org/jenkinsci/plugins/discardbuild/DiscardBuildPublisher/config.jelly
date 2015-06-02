@@ -6,13 +6,17 @@
     <f:entry title="${%NumToKeep}" field="numToKeep">
       <f:textbox />
     </f:entry>
+    
+    <f:entry title="${%NumForeverToKeep}" field="numForeverToKeep">
+      <f:textbox />
+    </f:entry>
 
-      <f:entry title="${%IntervalDaysToKeep}" field="intervalDaysToKeep">
-          <f:textbox />
-      </f:entry>
+    <f:entry title="${%IntervalDaysToKeep}" field="intervalDaysToKeep">
+      <f:textbox />
+    </f:entry>
 
     <f:entry title="${%IntervalNumToKeep}" field="intervalNumToKeep">
-        <f:textbox />
+      <f:textbox />
     </f:entry>
 
     <f:block>
@@ -31,9 +35,11 @@
     <f:entry title="${%MinLogFileSize}" field="minLogFileSize">
       <f:textbox />
     </f:entry>
+
     <f:entry title="${%MaxLogFileSize}" field="maxLogFileSize">
        <f:textbox />
     </f:entry>
+
     <f:entry title="${%RegularExpression}" field="regexp">
       <f:textbox />
     </f:entry>
