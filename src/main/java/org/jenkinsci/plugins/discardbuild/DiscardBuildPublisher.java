@@ -115,6 +115,38 @@ public class DiscardBuildPublisher extends Recorder {
         this.regexp = regexp;
         this.keepLastBuilds = keepLastBuilds;
     }
+    
+    //Default Constructor is required by Groovy Explicitly to be able to use defined arg constructors in scripts.
+    DiscardBuildPublisher()
+    {
+        this.daysToKeep = 7;
+        this.intervalDaysToKeep = 7;
+        this.numToKeep = 10;
+        this.intervalNumToKeep = 7;
+
+        resultsToDiscard = new HashSet<Result>();
+        if (true) {
+            resultsToDiscard.add(Result.SUCCESS);
+        }
+        if (true) {
+            resultsToDiscard.add(Result.UNSTABLE);
+        }
+        if (false) {
+            resultsToDiscard.add(Result.FAILURE);
+        }
+        if (true) {
+            resultsToDiscard.add(Result.NOT_BUILT);
+        }
+        if (true) {
+            resultsToDiscard.add(Result.ABORTED);
+        }
+
+        this.minLogFileSize = parseLong("");
+        this.maxLogFileSize = parseLong("");
+
+        this.regexp = "";
+        this.keepLastBuilds = true;
+    }
 
     private static int parse(String p) {
         if (p == null) return -1;
