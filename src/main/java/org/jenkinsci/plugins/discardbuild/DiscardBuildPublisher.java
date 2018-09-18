@@ -17,10 +17,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,6 +62,9 @@ public class DiscardBuildPublisher extends Recorder {
      * If true, will keep the last builds.
      */
     private final boolean keepLastBuilds;
+    private final int displayNameToKeep;
+    private final String displayNameRegex;
+
     /**
      * Regular expression.
      */
@@ -84,13 +84,22 @@ public class DiscardBuildPublisher extends Recorder {
             String minLogFileSize,
             String maxLogFileSize,
             String regexp,
-            boolean keepLastBuilds
+            boolean keepLastBuilds,
+            String displayNameToKeep,
+            String displayNameRegex
     ) {
 
         this.daysToKeep = parse(daysToKeep);
         this.intervalDaysToKeep = parse(intervalDaysToKeep);
         this.numToKeep = parse(numToKeep);
         this.intervalNumToKeep = parse(intervalNumToKeep);
+        this.displayNameToKeep = parse(displayNameToKeep);
+
+        if (displayNameRegex == null || displayNameRegex.length() == 0){
+            this.displayNameRegex = "(.*)";
+        } else {
+            this.displayNameRegex = displayNameRegex;
+        }
 
         resultsToDiscard = new HashSet<Result>();
         if (discardSuccess) {
@@ -312,7 +321,7 @@ public class DiscardBuildPublisher extends Recorder {
 
     private void deleteOldBuildsByIntervalNum(AbstractBuild<?, ?> build, BuildListener listener, int intervalNumToKeep) {
         ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
-        if (intervalNumToKeep == -1) return;
+        if (intervalNumToKeep <= -1) return;
         int index = 0;
         try {
             if (intervalNumToKeep == 1) intervalNumToKeep = 2;
@@ -338,6 +347,38 @@ public class DiscardBuildPublisher extends Recorder {
         }
     }
 
+    private void deleteOldBuildsByDisplayName(AbstractBuild<?, ?> build, BuildListener listener, int displayNameToKeep,
+                                              String displayNameRegex) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        Map<String, Integer> displayNameCounts = new HashMap<String, Integer>();
+
+        try {
+            if (displayNameToKeep > 0) {
+                Run<?, ?> r;
+                Pattern pattern = Pattern.compile(displayNameRegex);
+                for (int index = 0; index < list.size(); index++) {
+                    r = list.get(index);
+                    String displayName = r.getDisplayName();
+                    Matcher matcher = pattern.matcher(displayName);
+                    if (matcher.find()) {
+                        String displayMatch = matcher.group(1);
+                        if (displayNameCounts.containsKey(displayMatch)) {
+                            int displayNameCount = displayNameCounts.get(displayMatch) + 1;
+                            if (displayNameCount > displayNameToKeep) {
+                                discardBuild(r, "display name limit", listener);
+                            }
+                            displayNameCounts.put(displayMatch, displayNameCount);
+                        } else {
+                            displayNameCounts.put(displayMatch, 1);
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace(listener.error(""));
+        }
+    }
+
     private ArrayList<Run<?, ?>> updateBuildsList(AbstractBuild<?, ?> build, BuildListener listener) {
         RunList<Run<?, ?>> builds = new RunList<Run<?, ?>>();
         ArrayList<Run<?, ?>> list = new ArrayList<Run<?, ?>>();
@@ -357,6 +398,7 @@ public class DiscardBuildPublisher extends Recorder {
 
         // priority influence discard results, TODO: dynamic adjust priority on UI
         deleteOldBuildsByDays(build, listener, daysToKeep);
+        deleteOldBuildsByDisplayName(build, listener, displayNameToKeep, displayNameRegex);
         deleteOldBuildsByNum(build, listener, numToKeep);
         deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
         deleteOldBuildsByIntervalNum(build, listener, intervalNumToKeep);
@@ -416,6 +458,14 @@ public class DiscardBuildPublisher extends Recorder {
 
     public String getIntervalDaysToKeep() {
         return intToString(intervalDaysToKeep);
+    }
+
+    public String getDisplayNameToKeep() {
+        return intToString(displayNameToKeep);
+    }
+
+    public String getDisplayNameRegex() {
+        return displayNameRegex;
     }
 
     public String getRegexp() {

@@ -38,27 +38,27 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void setUp() throws Exception {
 		// setUp build histories
-        buildList.add(createBuild(job, Result.SUCCESS, "20130120", true)); // #20
-		buildList.add(createBuild(job, Result.SUCCESS, "20130120")); // #20
-		buildList.add(createBuild(job, Result.FAILURE, "20130119")); // #19
-		buildList.add(createBuild(job, Result.SUCCESS, "20130118")); // #18
-		buildList.add(createBuild(job, Result.SUCCESS, "20130117")); // #17 // for daysToKeep
-		buildList.add(createBuild(job, Result.FAILURE, "20130117")); // #16 // for daysToKeep
-		buildList.add(createBuild(job, Result.SUCCESS, "20130117")); // #15
-		buildList.add(createBuild(job, Result.SUCCESS, "20130114")); // #14
-		buildList.add(createBuild(job, Result.SUCCESS, "20130113")); // #13
-		buildList.add(createBuild(job, Result.SUCCESS, "20130112")); // #12
-		buildList.add(createBuild(job, Result.FAILURE, "20130111")); // #11
-		buildList.add(createBuild(job, Result.FAILURE, "20130110")); // #10
-		buildList.add(createBuild(job, Result.SUCCESS, "20130109")); // #9
-		buildList.add(createBuild(job, Result.SUCCESS, "20130108")); // #8
-		buildList.add(createBuild(job, Result.SUCCESS, "20130107")); // #7
-		buildList.add(createBuild(job, Result.SUCCESS, "20130106")); // #6
-		buildList.add(createBuild(job, Result.SUCCESS, "20130105")); // #5
-		buildList.add(createBuild(job, Result.FAILURE, "20130104")); // #4
-		buildList.add(createBuild(job, Result.ABORTED, "20130103")); // #3
-		buildList.add(createBuild(job, Result.UNSTABLE, "20130102")); // #2
-		buildList.add(createBuild(job, Result.NOT_BUILT, "20130101")); // #1
+        buildList.add(createBuild(job, Result.SUCCESS, "20130120", true, "My Build C")); // #20
+		buildList.add(createBuild(job, Result.SUCCESS, "20130120", "G Build A")); // #20
+		buildList.add(createBuild(job, Result.FAILURE, "20130119", "My Build C")); // #19
+		buildList.add(createBuild(job, Result.SUCCESS, "20130118", "My Build A")); // #18
+		buildList.add(createBuild(job, Result.SUCCESS, "20130117", "My Build A")); // #17 // for daysToKeep
+		buildList.add(createBuild(job, Result.FAILURE, "20130117", "My Build A")); // #16 // for daysToKeep
+		buildList.add(createBuild(job, Result.SUCCESS, "20130117", "Y Build B")); // #15
+		buildList.add(createBuild(job, Result.SUCCESS, "20130114", "My Build B")); // #14
+		buildList.add(createBuild(job, Result.SUCCESS, "20130113", "My Build A")); // #13
+		buildList.add(createBuild(job, Result.SUCCESS, "20130112", "My Build C")); // #12
+		buildList.add(createBuild(job, Result.FAILURE, "20130111", "My Build A")); // #11
+		buildList.add(createBuild(job, Result.FAILURE, "20130110", "Z Build A")); // #10
+		buildList.add(createBuild(job, Result.SUCCESS, "20130109", "My Build B")); // #9
+		buildList.add(createBuild(job, Result.SUCCESS, "20130108", "My Build A")); // #8
+		buildList.add(createBuild(job, Result.SUCCESS, "20130107", "My Build A")); // #7
+		buildList.add(createBuild(job, Result.SUCCESS, "20130106", "My Build B")); // #6
+		buildList.add(createBuild(job, Result.SUCCESS, "20130105", "My Build C")); // #5
+		buildList.add(createBuild(job, Result.FAILURE, "20130104", "My Build A")); // #4
+		buildList.add(createBuild(job, Result.ABORTED, "20130103", "X Build A")); // #3
+		buildList.add(createBuild(job, Result.UNSTABLE, "20130102", "My Build A")); // #2
+		buildList.add(createBuild(job, Result.NOT_BUILT, "20130101", "My Build D")); // #1
 
 		when(listener.getLogger()).thenReturn(logger);
 		when(job.getBuilds()).thenReturn(RunList.fromRuns(buildList));
@@ -69,7 +69,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "", "", "",
 				false, false, false, false, false,
-				"", "", "", true));
+				"", "", "", true, "",
+				""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 0; i < 21; i++) {
@@ -81,7 +82,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"3", "", "", "",
 				false, false, false, false, false,
-				"", "", "", true));
+				"", "", "", true, "",
+				""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 0; i < 7; i++) {
@@ -96,7 +98,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "","5", "",
 				false, false, false, false, false,
-                "", "", "", true));
+                "", "", "", true, "",
+				""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 1; i < 6; i++) {
@@ -111,7 +114,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "","", "",
 				false, true, false, true, true,		// unstable, not built, aborted
-				"", "", "", true));
+				"", "", "", true, "",
+				""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 1; i < 18; i++) {
@@ -126,7 +130,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "","5","",
 				false, false, true, false, false,		// failure
-                "", "", "", true));		// failure
+                "", "", "", true, "",
+				""));		// failure
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
@@ -157,7 +162,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "3", "", "",
 				false, false, false, false, false,
-                "", "", "", true));
+                "", "", "", true, "",
+				""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
@@ -188,7 +194,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "", "", "3",
 				false, false, false, false, false,
-                "", "", "", true));
+                "", "", "", true, "",
+				""));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
@@ -215,13 +222,50 @@ public class DiscardBuildPublisherTest extends TestCase {
 		verify(buildList.get(20), times(1)).delete(); // to keep
 	}
 
+	public void testPerformDisplayNameToKeep() throws Exception {
+		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+				"", "", "", "",
+				false, false, false, false, false,
+				"", "", "", true, "2",
+				"(Build [A-Z]+)"));
+
+		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+
+		verify(buildList.get(0), never()).delete(); // building
+		verify(buildList.get(1), never()).delete(); // new build
+		verify(buildList.get(2), never()).delete(); // new build
+		verify(buildList.get(3), never()).delete(); // new build
+		verify(buildList.get(4), times(1)).delete(); // new build
+		verify(buildList.get(5), times(1)).delete(); // new build
+		verify(buildList.get(6), never()).delete();
+		verify(buildList.get(7), never()).delete();
+		verify(buildList.get(8), times(1)).delete(); // to keep
+		verify(buildList.get(9), never()).delete();
+		verify(buildList.get(10), times(1)).delete();
+		verify(buildList.get(11), times(1)).delete(); // to keep
+		verify(buildList.get(12), times(1)).delete();
+		verify(buildList.get(13), times(1)).delete();
+		verify(buildList.get(14), times(1)).delete(); // to keep
+		verify(buildList.get(15), times(1)).delete();
+		verify(buildList.get(16), times(1)).delete();
+		verify(buildList.get(17), times(1)).delete(); // to keep
+		verify(buildList.get(18), times(1)).delete();
+		verify(buildList.get(19), times(1)).delete();
+		verify(buildList.get(20), never()).delete(); // to keep
+	}
+
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
-        return createBuild(project, result, yyyymmdd, false);
+        return createBuild(project, result, yyyymmdd, false, "My Build");
     }
 
-	private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd, boolean building) throws Exception {
+	private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd, String displayName) throws Exception {
+		return createBuild(project, result, yyyymmdd, false, displayName);
+	}
+
+	private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd, boolean building, String displayName) throws Exception {
 		FreeStyleBuild build = spy(new FreeStyleBuild(project));
 
+		when(build.getDisplayName()).thenReturn(displayName);
 		when(build.getResult()).thenReturn(result);
         when(build.isBuilding()).thenReturn(building);
 		Calendar cal = Calendar.getInstance();
