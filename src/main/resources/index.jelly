@@ -1,7 +1,6 @@
 <!--
   This view is used to render the installed plugins page.
 -->
-<?jelly escape-by-default='true'?>
 <div>
   This plugin enables detail configuration to discard old builds like using
     logfile size / status / days/ intervals days / build num / logfile regular expression.
