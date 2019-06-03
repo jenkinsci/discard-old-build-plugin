@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.515</version><!-- which version of Jenkins is this plugin built against? -->
+    <version>3.43</version><!-- which version of Jenkins is this plugin built against? -->
   </parent>
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
@@ -29,13 +29,8 @@
   </pluginRepositories>
   <dependencies>
   	<dependency>
-  		<groupId>maven</groupId>
-  		<artifactId>dom4j</artifactId>
-  		<version>1.7-20060614</version>
-  	</dependency>
-  	<dependency>
   		<groupId>org.mockito</groupId>
-  		<artifactId>mockito-all</artifactId>
+  		<artifactId>mockito-core</artifactId>
   		<version>1.9.5</version>
   		<scope>test</scope>
   	</dependency>
