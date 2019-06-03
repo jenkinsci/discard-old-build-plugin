@@ -12,28 +12,32 @@
   <packaging>hpi</packaging>
   <name>Discard Old Build plugin</name>
   <description>Add post-build step to discard old builds with detail configuration</description>
-  
+
+  <properties>
+    <jenkins.version>2.60.3</jenkins.version>
+    <java.level>8</java.level>
+  </properties>
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
   <dependencies>
-  	<dependency>
-  		<groupId>org.mockito</groupId>
-  		<artifactId>mockito-core</artifactId>
-  		<version>1.9.5</version>
-  		<scope>test</scope>
-  	</dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-core</artifactId>
@@ -41,26 +45,19 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  
+
   <developers>
     <developer>
       <id>nkns165</id>
       <name>Hiroko Tamagawa</name>
       <email>nkns165@gmail.com</email>
     </developer>
-     <developer>
-       <id>joeyjiao</id>
-       <name>Joey Jiao</name>
-       <email>joey.jiaojg@gmail.com</email>
-     </developer>
+    <developer>
+      <id>joeyjiao</id>
+      <name>Joey Jiao</name>
+      <email>joey.jiaojg@gmail.com</email>
+    </developer>
   </developers>
-
-  <distributionManagement>
-    <repository>
-      <id>maven.jenkins-ci.org</id>
-      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-    </repository>
-  </distributionManagement>
 
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/discard-old-build-plugin.git</connection>
