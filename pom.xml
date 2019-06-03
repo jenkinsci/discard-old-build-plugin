@@ -40,7 +40,14 @@
   		<scope>test</scope>
   	</dependency>
   </dependencies>
-  
+
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
   <developers>
     <developer>
       <id>nkns165</id>
@@ -52,6 +59,11 @@
        <name>Joey Jiao</name>
        <email>joey.jiaojg@gmail.com</email>
      </developer>
+    <developer>
+      <id>BenjaminBeggs</id>
+      <name>Benjamin Beggs</name>
+      <email>benjaminbeggspublic@yahoo.com</email>
+    </developer>
   </developers>
 
   <distributionManagement>
