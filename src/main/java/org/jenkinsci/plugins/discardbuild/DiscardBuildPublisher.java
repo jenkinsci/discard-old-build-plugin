@@ -355,19 +355,15 @@ public class DiscardBuildPublisher extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         listener.getLogger().println("Discard old builds..."); //$NON-NLS-1$
 
-        if(daysToKeep != -1 || numToKeep != -1) {
-            // priority influence discard results, TODO: dynamic adjust priority on UI
-            deleteOldBuildsByDays(build, listener, daysToKeep);
-            deleteOldBuildsByNum(build, listener, numToKeep);
-            deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
-            deleteOldBuildsByIntervalNum(build, listener, intervalNumToKeep);
-            deleteOldBuildsByStatus(build, listener, resultsToDiscard);
-            deleteOldBuildsByLogfileSize(build, listener, minLogFileSize, maxLogFileSize);
-            deleteOldBuildsByRegexp(build, listener, regexp);
-        }
-        else{
-            listener.getLogger().println("No builds will be discarded as Days to keep and Max # to keep are kept blank....");
-        }
+        // priority influence discard results, TODO: dynamic adjust priority on UI
+        deleteOldBuildsByDays(build, listener, daysToKeep);
+        deleteOldBuildsByNum(build, listener, numToKeep);
+        deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
+        deleteOldBuildsByIntervalNum(build, listener, intervalNumToKeep);
+        deleteOldBuildsByStatus(build, listener, resultsToDiscard);
+        deleteOldBuildsByLogfileSize(build, listener, minLogFileSize, maxLogFileSize);
+        deleteOldBuildsByRegexp(build, listener, regexp);
+
         return true;
     }
 
