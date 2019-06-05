@@ -8,7 +8,7 @@
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
   <artifactId>discard-old-build</artifactId>
-  <version>1.06-SNAPSHOT</version>
+  <version>1.X-feature-test</version>
   <packaging>hpi</packaging>
   <name>Discard Old Build plugin</name>
   <description>Jenkins plugin to manage old build discards with more user-configurability than core functionality</description>
@@ -18,7 +18,7 @@
     <java.level>7</java.level>
   </properties>
 
-  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
+  <!-- get every artifact through repo.jenkins-ci.org, which proxies all needed artifacts -->
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
@@ -32,6 +32,7 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
+
   <dependencies>
   	<dependency>
   		<groupId>org.mockito</groupId>

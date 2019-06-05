@@ -22,11 +22,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Builder that discards old build histories according to more detail configurations than the core function.
- * This enables discarding builds by build status or keeping older builds for every N builds / N days
- * or discarding builds which have too small or too large logfile size.
+ * Plugin that discards old build histories with greater user configurability than the core function.
+ * Enables discarding builds by status, keeping older builds for every N builds / N days,
+ * or discarding builds which have too small or too large logfile size (along with a combination of some of these).
  *
- * @author tamagawahiroko
+ * @author tamagawahiroko, benjaminbeggs
  */
 
 public class DiscardBuildPublisher extends Recorder {
@@ -115,6 +115,7 @@ public class DiscardBuildPublisher extends Recorder {
         this.maxLogFileSize = parseLong(maxLogFileSize);
 
         this.regexp = regexp;
+
         this.keepLastBuilds = keepLastBuilds;
         this.holdMaxBuilds = holdMaxBuilds;
     }
