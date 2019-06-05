@@ -69,7 +69,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "", "", "",
 				false, false, false, false, false,
-				"", "", "", true));
+				"", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 0; i < 21; i++) {
@@ -81,7 +81,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"3", "", "", "",
 				false, false, false, false, false,
-				"", "", "", true));
+				"", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 0; i < 7; i++) {
@@ -96,7 +96,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "","5", "",
 				false, false, false, false, false,
-                "", "", "", true));
+                "", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 1; i < 6; i++) {
@@ -111,7 +111,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "","", "",
 				false, true, false, true, true,		// unstable, not built, aborted
-				"", "", "", true));
+				"", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 		for (int i = 1; i < 18; i++) {
@@ -126,7 +126,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "","5","",
 				false, false, true, false, false,		// failure
-                "", "", "", true));		// failure
+                "", "", "", true, false));		// failure
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
@@ -157,7 +157,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "3", "", "",
 				false, false, false, false, false,
-                "", "", "", true));
+                "", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
@@ -188,7 +188,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"", "", "", "3",
 				false, false, false, false, false,
-                "", "", "", true));
+                "", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
 
