@@ -190,7 +190,7 @@ public class DiscardBuildPublisher extends Recorder {
         Run lastStableBuild = job.getLastStableBuild();
         Run lastSuccessfulBuild = job.getLastSuccessfulBuild();
         Run lastUnstableBuild = job.getLastUnstableBuild();
-        Run lastUnsuccessfulBuild = job.getLastSuccessfulBuild();
+        Run lastUnsuccessfulBuild = job.getLastUnsuccessfulBuild();
 
         for (Run<?, ?> r : builds) {
             if (r.isBuilding()) continue;
