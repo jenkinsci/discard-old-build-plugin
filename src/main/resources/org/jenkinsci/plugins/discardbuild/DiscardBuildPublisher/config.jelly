@@ -42,6 +42,7 @@
         <table>
             <tr>
                 <td><f:checkbox title="${%KeepLastBuilds}" name="keepLastBuilds" checked="${instance.keepLastBuilds}"/></td>
+                <td><f:checkbox title="${%HoldMaxBuilds}" name="holdMaxBuilds" checked="${instance.holdMaxBuilds}"/></td>
             </tr>
         </table>
     </f:block>

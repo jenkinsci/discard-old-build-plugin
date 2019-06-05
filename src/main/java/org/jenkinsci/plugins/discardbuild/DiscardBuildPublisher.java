@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.jenkinsci.plugins.discardbuild;
 
 import hudson.Extension;
@@ -27,12 +24,12 @@ import java.util.regex.Pattern;
 /**
  * Builder that discards old build histories according to more detail configurations than the core function.
  * This enables discarding builds by build status or keeping older builds for every N builds / N days
- * or discarding buildswhich has too small or too big logfile size.
+ * or discarding builds which have too small or too large logfile size.
  *
  * @author tamagawahiroko
  */
-public class DiscardBuildPublisher extends Recorder {
 
+public class DiscardBuildPublisher extends Recorder {
     /**
      * If not -1, history is only kept up to this days.
      */
@@ -66,6 +63,10 @@ public class DiscardBuildPublisher extends Recorder {
      */
     private final boolean keepLastBuilds;
     /**
+     * If true, will always keep a number of builds equal to or lesser than the max number of builds the user defines.
+     */
+    private final boolean holdMaxBuilds;
+    /**
      * Regular expression.
      */
     private final String regexp;
@@ -84,7 +85,8 @@ public class DiscardBuildPublisher extends Recorder {
             String minLogFileSize,
             String maxLogFileSize,
             String regexp,
-            boolean keepLastBuilds
+            boolean keepLastBuilds,
+            boolean holdMaxBuilds
     ) {
 
         this.daysToKeep = parse(daysToKeep);
@@ -114,6 +116,7 @@ public class DiscardBuildPublisher extends Recorder {
 
         this.regexp = regexp;
         this.keepLastBuilds = keepLastBuilds;
+        this.holdMaxBuilds = holdMaxBuilds;
     }
 
     private static int parse(String p) {
@@ -164,11 +167,9 @@ public class DiscardBuildPublisher extends Recorder {
 
     class ExtendRunList extends RunList<Run<?, ?>> {
         private ArrayList<Run<?, ?>> newList;
-
         ExtendRunList() {
             newList = new ArrayList<Run<?, ?>>();
         }
-
         ArrayList<Run<?, ?>> getNewList() {
             return newList;
         }
@@ -214,6 +215,22 @@ public class DiscardBuildPublisher extends Recorder {
             newList.add(r);
         }
         return newList.getNewList();
+    }
+
+    private ArrayList<Run<?, ?>> HoldMaxBuilds(ArrayList<Run<?, ?>> listIn, BuildListener listener, int maxCount) {
+        ArrayList<Run<?, ?>> listUpdt = new ArrayList<Run<?, ?>>();
+        listUpdt = listIn;
+        int listCnt = listUpdt.size();
+        if (listCnt < maxCount||listCnt == maxCount){ // clear discard list if beneath minimum build quantity
+            listener.getLogger().println("Too few builds present to remove any, clearing discard list.");
+            listUpdt.clear();}
+        else if (listCnt > maxCount) {
+            for (int i = 0; i < maxCount; i++) {
+                listener.getLogger().println("Removing build from discard list to maintain max quantity:");
+                listener.getLogger().println(listUpdt.get(0));
+                listUpdt.remove(0);}
+        }
+        return listUpdt;
     }
 
     private void deleteOldBuildsByRegexp(AbstractBuild<?, ?> build, BuildListener listener, String regexp) {
@@ -342,12 +359,13 @@ public class DiscardBuildPublisher extends Recorder {
         RunList<Run<?, ?>> builds = new RunList<Run<?, ?>>();
         ArrayList<Run<?, ?>> list = new ArrayList<Run<?, ?>>();
         Job<?, ?> job = (Job<?, ?>) build.getParent();
-
         builds = (RunList<Run<?, ?>>) job.getBuilds();
         if (isKeepLastBuilds())
             list = keepLastBuilds(build, listener, builds);
         else
             list = discardLastBuilds(build, listener, builds);
+        if (isHoldMaxBuilds())
+            list = HoldMaxBuilds(list, listener, numToKeep);
         return list;
     }
 
@@ -446,9 +464,9 @@ public class DiscardBuildPublisher extends Recorder {
         return resultsToDiscard.contains(Result.ABORTED);
     }
 
-    public boolean isKeepLastBuilds() {
-        return keepLastBuilds;
-    }
+    public boolean isKeepLastBuilds() { return keepLastBuilds;}
+
+    public boolean isHoldMaxBuilds() { return holdMaxBuilds;}
 
     @Override
     public DescriptorImpl getDescriptor() {
