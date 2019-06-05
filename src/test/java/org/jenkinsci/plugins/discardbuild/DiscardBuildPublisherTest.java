@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 /**
  * Test for {@link DiscardBuildPublisher#perform(hudson.model.AbstractBuild, hudson.Launcher, hudson.model.BuildListener)}.
  *
- * @author tamagawahiroko
+ * @author tamagawahiroko, benjaminbeggs
  *
  */
 public class DiscardBuildPublisherTest extends TestCase {
@@ -213,6 +213,9 @@ public class DiscardBuildPublisherTest extends TestCase {
 		verify(buildList.get(18), times(1)).delete();
 		verify(buildList.get(19), never()).delete();
 		verify(buildList.get(20), times(1)).delete(); // to keep
+	}
+
+	public void testPerformHoldMaxBuilds() throws Exception {
 	}
 
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
