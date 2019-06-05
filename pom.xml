@@ -14,7 +14,7 @@
   <description>Add post-build step to discard old builds with detail configuration</description>
 
   <properties>
-    <jenkins.version>2.60.3</jenkins.version>
+    <jenkins.version>3.43</jenkins.version>
     <java.level>8</java.level>
   </properties>
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
@@ -35,13 +35,13 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>1.9.5</version>
+      <version>2.28.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-core</artifactId>
-      <version>1.3</version>
+      <version>2.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -64,11 +64,11 @@
       <name>Joey Jiao</name>
       <email>joey.jiaojg@gmail.com</email>
     </developer>
-    <developer>
-      <id>BenjaminBeggs</id>
-      <name>Benjamin Beggs</name>
-      <email>benjaminbeggspublic@yahoo.com</email>
-    </developer>
+     <developer>
+       <id>BenjaminBeggs</id>
+       <name>Benjamin Beggs</name>
+       <email>benjaminbeggspublic@yahoo.com</email>
+     </developer>
   </developers>
 
   <scm>
@@ -77,6 +77,6 @@
     <url>https://github.com/jenkinsci/discard-old-build-plugin</url>
   </scm>
 
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Discard+Old+Build+plugin</url>
+  <url>https://wiki.jenkins-ci.org/display/JENKINS/Discard+Old+Build+plugin</url>
 
 </project>
