@@ -216,6 +216,20 @@ public class DiscardBuildPublisherTest extends TestCase {
 	}
 
 	public void testPerformHoldMaxBuilds() throws Exception {
+		/* instantiates plugin discard conditions */
+		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+				"3", "", "5", "",
+				false, false, false, false, false,
+				"", "", "", true, true));
+/*
+		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+		for (int i = 0; i < 7; i++) {
+			verify(buildList.get(i), never()).delete();
+		}
+		for (int i = 7; i < 21; i++) {
+			verify(buildList.get(i), times(1)).delete();
+		}
+ */
 	}
 
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
