@@ -64,11 +64,29 @@
       <name>Joey Jiao</name>
       <email>joey.jiaojg@gmail.com</email>
     </developer>
+<<<<<<< Updated upstream
      <developer>
        <id>BenjaminBeggs</id>
        <name>Benjamin Beggs</name>
        <email>benjaminbeggspublic@yahoo.com</email>
      </developer>
+     <developer>
+       <id>joeyjiao</id>
+       <name>Joey Jiao</name>
+       <email>joey.jiaojg@gmail.com</email>
+     </developer>
+     <developer>
+       <id>BenjaminBeggs</id>
+       <name>Benjamin Beggs</name>
+       <email>benjaminbeggspublic@yahoo.com</email>
+     </developer>
+=======
+    <developer>
+      <id>BenjaminBeggs</id>
+      <name>Benjamin Beggs</name>
+      <email>benjaminbeggspublic@yahoo.com</email>
+    </developer>
+>>>>>>> Stashed changes
   </developers>
 
   <scm>
