@@ -237,23 +237,38 @@ public class DiscardBuildPublisherTest extends TestCase {
 		verify(buildList.get(20), times(1)).delete(); // to keep
 	}
 
-	public void testPerformHoldMaxBuilds() throws Exception {
-		// instantiates plugin discard conditions
+	public void testPerformHoldMaxBuildsFirstCnd() throws Exception {
+		// instantiates plugin discard conditions, testing for circumstance where builds to be discarded
+		// are equal in count to maximum build hold quantity
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"10", "", "5", "",
+				"10", "", "10", "",
 				false, false, false, false, false,
-				"", "", "", true, false));
+				"", "", "", true, true));
 
 		// emulates build data and post-build plugin operation
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		/*for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 10; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
-		for (int i = 6; i < 11; i++) {
-			verify(buildListHMS.get(i), times(1)).delete();
+	}
+	public void testPerformHoldMaxBuildsSecondCnd() throws Exception {
+		// instantiates plugin discard conditions
+		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+				"10", "", "5", "",
+				false, false, false, false, false,
+				"", "", "", true, true));
+
+		// emulates build data and post-build plugin operation
+		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
+
+		for (int i = 0; i < 6; i++) {
+			verify(buildListHMS.get(i), never()).delete();
 		}
-				 */
+		//for (int i = 6; i < 11; i++) {
+		//	verify(buildListHMS.get(i), times(1)).delete();
+		//	}
+
 	}
 
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
