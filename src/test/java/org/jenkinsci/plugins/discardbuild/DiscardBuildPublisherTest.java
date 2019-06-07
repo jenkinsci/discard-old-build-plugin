@@ -33,24 +33,26 @@ public class DiscardBuildPublisherTest extends TestCase {
 	private PrintStream logger = mock(PrintStream.class);
 	private BuildListener listener = mock(BuildListener.class);
 	private FreeStyleBuild build = mock(FreeStyleBuild.class);
+	private FreeStyleBuild buildHMS = mock(FreeStyleBuild.class);
 	private FreeStyleProject job = mock(FreeStyleProject.class);
+	private FreeStyleProject jobHMS = mock(FreeStyleProject.class);
 	private List<FreeStyleBuild> buildList = new ArrayList<FreeStyleBuild>();
 	private List<FreeStyleBuild> buildListHMS = new ArrayList<FreeStyleBuild>(); // buildList used to test specific hold max build feature conditions
 
 	public void setUp() throws Exception {
 
 		// setUp hold max build specific histories
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120110", true)); // #10
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120110")); // #10
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120109")); // #9
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120108")); // #8
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120107")); // #7
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120106")); // #6
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120105")); // #5
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120104")); // #4
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120103")); // #3
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120102")); // #2
-		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120101")); // #1
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120110", true)); // #10
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120110")); // #10
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120109")); // #9
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120108")); // #8
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120107")); // #7
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120106")); // #6
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120105")); // #5
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120104")); // #4
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120103")); // #3
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120102")); // #2
+		buildListHMS.add(createBuild(jobHMS, Result.SUCCESS, "20120101")); // #1
 
 		// setUp generic build histories
         buildList.add(createBuild(job, Result.SUCCESS, "20130120", true)); // #20
@@ -78,6 +80,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		when(listener.getLogger()).thenReturn(logger);
 		when(job.getBuilds()).thenReturn(RunList.fromRuns(buildList));
 		when(build.getParent()).thenReturn(job);
+		when(jobHMS.getBuilds()).thenReturn(RunList.fromRuns(buildListHMS));
+		when(buildHMS.getParent()).thenReturn(jobHMS);
 	}
 
 	public void testPerformNoCondition() throws Exception {
@@ -237,18 +241,19 @@ public class DiscardBuildPublisherTest extends TestCase {
 		// instantiates plugin discard conditions
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"10", "", "5", "",
-				true, false, false, false, false,
-				"", "", "", true, true));
+				false, false, false, false, false,
+				"", "", "", true, false));
 
 		// emulates build data and post-build plugin operation
-		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		for (int i = 0; i < 6; i++) {
+		/*for (int i = 0; i < 6; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
-		//for (int i = 6; i < 11; i++) {
-		//	verify(buildListHMS.get(i), times(1)).delete();
-		//}
+		for (int i = 6; i < 11; i++) {
+			verify(buildListHMS.get(i), times(1)).delete();
+		}
+				 */
 	}
 
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
