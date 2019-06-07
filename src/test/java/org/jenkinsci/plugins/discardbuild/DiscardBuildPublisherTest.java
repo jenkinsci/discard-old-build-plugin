@@ -239,7 +239,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 	public void testPerformHoldMaxBuildsFirstCnd() throws Exception {
 		// instantiates plugin discard conditions, testing for circumstance where builds to be discarded
-		// are equal in count to maximum build hold quantity
+		// are equal in count to maximum build hold quantity such that build queue is cleared
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"10", "", "10", "",
 				false, false, false, false, false,
@@ -253,7 +253,8 @@ public class DiscardBuildPublisherTest extends TestCase {
 		}
 	}
 	public void testPerformHoldMaxBuildsSecondCnd() throws Exception {
-		// instantiates plugin discard conditions
+		// instantiates plugin discard conditions, testing for circumstance where only
+		// part of the build queue needs to be cleared
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"10", "", "5", "",
 				false, false, false, false, false,
@@ -265,10 +266,9 @@ public class DiscardBuildPublisherTest extends TestCase {
 		for (int i = 0; i < 6; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
-		//for (int i = 6; i < 11; i++) {
-		//	verify(buildListHMS.get(i), times(1)).delete();
-		//	}
-
+		for (int i = 6; i < 11; i++) {
+			verify(buildListHMS.get(i), times(1)).delete();
+			}
 	}
 
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
