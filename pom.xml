@@ -4,7 +4,6 @@
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
     <version>3.43</version><!-- which version of Jenkins is this plugin built against? -->
-    <relativePath />
   </parent>
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
