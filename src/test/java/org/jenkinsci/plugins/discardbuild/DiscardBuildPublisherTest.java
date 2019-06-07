@@ -25,19 +25,34 @@ import static org.mockito.Mockito.*;
  * @author tamagawahiroko, benjaminbeggs
  *
  */
+
 public class DiscardBuildPublisherTest extends TestCase {
 
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-
 	private Launcher launcher = mock(Launcher.class);
 	private PrintStream logger = mock(PrintStream.class);
 	private BuildListener listener = mock(BuildListener.class);
 	private FreeStyleBuild build = mock(FreeStyleBuild.class);
 	private FreeStyleProject job = mock(FreeStyleProject.class);
 	private List<FreeStyleBuild> buildList = new ArrayList<FreeStyleBuild>();
+	private List<FreeStyleBuild> buildListHMS = new ArrayList<FreeStyleBuild>(); // buildList used to test specific hold max build feature conditions
 
 	public void setUp() throws Exception {
-		// setUp build histories
+
+		// setUp hold max build specific histories
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120110", true)); // #10
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120110")); // #10
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120109")); // #9
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120108")); // #8
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120107")); // #7
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120106")); // #6
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120105")); // #5
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120104")); // #4
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120103")); // #3
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120102")); // #2
+		buildListHMS.add(createBuild(job, Result.SUCCESS, "20120101")); // #1
+
+		// setUp generic build histories
         buildList.add(createBuild(job, Result.SUCCESS, "20130120", true)); // #20
 		buildList.add(createBuild(job, Result.SUCCESS, "20130120")); // #20
 		buildList.add(createBuild(job, Result.FAILURE, "20130119")); // #19
@@ -84,6 +99,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+
 		for (int i = 0; i < 7; i++) {
 			verify(buildList.get(i), never()).delete();
 		}
@@ -99,6 +115,7 @@ public class DiscardBuildPublisherTest extends TestCase {
                 "", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+
 		for (int i = 1; i < 6; i++) {
 			verify(buildList.get(i), never()).delete();
 		}
@@ -114,6 +131,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 				"", "", "", true, false));
 
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
+
 		for (int i = 1; i < 18; i++) {
 			verify(buildList.get(i), never()).delete();
 		}
@@ -216,20 +234,21 @@ public class DiscardBuildPublisherTest extends TestCase {
 	}
 
 	public void testPerformHoldMaxBuilds() throws Exception {
-		/* instantiates plugin discard conditions */
+		// instantiates plugin discard conditions
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"3", "", "5", "",
-				false, false, false, false, false,
+				"10", "", "5", "",
+				true, false, false, false, false,
 				"", "", "", true, true));
-/*
+
+		// emulates build data and post-build plugin operation
 		publisher.perform((AbstractBuild<?, ?>) build, launcher, listener);
-		for (int i = 0; i < 7; i++) {
-			verify(buildList.get(i), never()).delete();
+
+		for (int i = 0; i < 6; i++) {
+			verify(buildListHMS.get(i), never()).delete();
 		}
-		for (int i = 7; i < 21; i++) {
-			verify(buildList.get(i), times(1)).delete();
-		}
- */
+		//for (int i = 6; i < 11; i++) {
+		//	verify(buildListHMS.get(i), times(1)).delete();
+		//}
 	}
 
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
@@ -266,6 +285,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		return spy;
 	}
 
+// creates fake clock listing to test build age discard conditions
 	private Calendar createCalendar() throws Exception {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(sdf.parse("20130120"));
