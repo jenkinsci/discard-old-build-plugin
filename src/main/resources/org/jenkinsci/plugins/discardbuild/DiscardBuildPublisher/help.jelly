@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core">
+    <dl>
+        <dt><code>Require both quantity and age conditions to be met for build discard</dt>
+        <dd>
+            <p>
+                Allows a user to request both quantity and age conditions are met prior to build discard. This means that if N max builds are set with M max age, builds will only be cleared if they exceed the given age and if their quantity exceed the maximum build quantity. The feature will thus never allow build deletion to leave less builds than the N max builds set, or allow build deletion of builds under the M max age regardless of N max builds set.
+            </p>
+        </dd>
+    </dl>
+</j:jelly>

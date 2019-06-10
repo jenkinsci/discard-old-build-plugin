@@ -279,7 +279,6 @@ public class DiscardBuildPublisherTest extends TestCase {
 				false, false, false, false, false,
 				"", "", "", false, true));
 
-		// emulates build data and post-build plugin operation
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
 		for (int i = 1; i < 11; i++) {
