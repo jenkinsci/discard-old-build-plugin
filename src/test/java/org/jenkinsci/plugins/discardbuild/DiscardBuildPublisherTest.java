@@ -286,6 +286,21 @@ public class DiscardBuildPublisherTest extends TestCase {
 		}
 	}
 
+	public void testPerformHoldMaxBuildsFourthCnd() throws Exception {
+		// testing for circumstance where max builds is set to 0 and days to keep is not
+		// forcing deletion of all builds exceeding age, with no effect from max build quantity
+		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+				"10", "", "0", "",
+				false, false, false, false, false,
+				"", "", "", false, true));
+
+		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
+
+		for (int i = 1; i < 11; i++) {
+			verify(buildListHMS.get(i), times(1)).delete();
+		}
+	}
+
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
         return createBuild(project, result, yyyymmdd, false);
     }
