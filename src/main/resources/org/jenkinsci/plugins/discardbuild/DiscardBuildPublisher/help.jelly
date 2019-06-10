@@ -3,7 +3,9 @@
 <j:jelly xmlns:j="jelly:core">
     <p>
         Discard Old Build plugin functionality is detailed below. The plugin allows for setting build discard
-        conditions with greater specificity than is available in the Jenkin's core function.
+        conditions with greater specificity than is available in the Jenkin's core function. It is recommended that
+        users carefully test plugin configurations before implementing in important projects to avoid any plugin
+        functionality misunderstandings unwanted build history discards.
     </p>
     <dl>
         <dt><code>Days to keep builds</code></dt>
@@ -70,8 +72,14 @@
                 the given age and if their quantity exceed the N max build quantity. The feature will thus never
                 allow build deletion to leave less builds than the N max builds set, or allow build deletion of builds
                 under the M max age regardless of N max builds set.
-
+            </p>
+            <p>
                 <b>NOTE:</b> This feature does nothing if <i>Days to keep builds</i> and/or <i>Max # of builds to keep</i> are empty.
+            </p>
+            <p>
+                <b>Recommended Configuration:</b> Set a max age and build quantity and turn this feature on, leave
+                additional plugin settings in their default off setting. This configuration has been tested and
+                functions as described in the feature description.
             </p>
         </dd>
     </dl>
