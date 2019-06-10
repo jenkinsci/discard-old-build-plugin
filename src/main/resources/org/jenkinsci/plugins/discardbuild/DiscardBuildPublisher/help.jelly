@@ -69,9 +69,9 @@
             <p>
                 Allows a user to request both quantity and age conditions are met prior to build discard.
                 This means that if N max builds are set with M max age, builds will only be cleared if they exceed
-                the given age and if their quantity exceed the N max build quantity. The feature will thus never
+                the given age <i>and</i> if their quantity exceed the N max build quantity. The feature will thus never
                 allow build deletion to leave less builds than the N max builds set, or allow build deletion of builds
-                under the M max age regardless of N max builds set.
+                under the M max age <i>regardless</i> of N max builds set.
             </p>
             <p>
                 <b>NOTE:</b> This feature does nothing if <i>Days to keep builds</i> and/or <i>Max # of builds to keep</i> are empty.
