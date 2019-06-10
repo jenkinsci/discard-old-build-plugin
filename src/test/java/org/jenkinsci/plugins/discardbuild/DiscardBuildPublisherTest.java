@@ -238,37 +238,53 @@ public class DiscardBuildPublisherTest extends TestCase {
 	}
 
 	public void testPerformHoldMaxBuildsFirstCnd() throws Exception {
-		// instantiates plugin discard conditions, testing for circumstance where builds to be discarded
-		// are equal in count to maximum build hold quantity such that build queue is cleared
+		// testing for circumstance where builds to be discarded
+		// are greater in amount than builds present, causing build discard queue to be cleared
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
-				"10", "", "10", "",
+				"10", "", "20", "",
 				false, false, false, false, false,
-				"", "", "", true, true));
+				"", "", "", false, true));
 
 		// emulates build data and post-build plugin operation
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		for (int i = 0; i < 10; i++) {
+		for (int i = 1; i < 10; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
 	}
+
 	public void testPerformHoldMaxBuildsSecondCnd() throws Exception {
-		// instantiates plugin discard conditions, testing for circumstance where only
-		// part of the build queue needs to be cleared
+		// testing for circumstance where only max build quantity is kept
+		// while remaining build history is cleared since it exceeds max age
 		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
 				"10", "", "5", "",
 				false, false, false, false, false,
-				"", "", "", true, true));
+				"", "", "", false, true));
 
-		// emulates build data and post-build plugin operation
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		for (int i = 0; i < 6; i++) {
+		for (int i = 1; i < 5; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
 		for (int i = 6; i < 11; i++) {
 			verify(buildListHMS.get(i), times(1)).delete();
 			}
+	}
+
+	public void testPerformHoldMaxBuildsThirdCnd() throws Exception {
+		// testing for circumstance where no builds are cleared since logs are beneath max age
+		// despite exceeding max build quantity
+		DiscardBuildPublisher publisher = getPublisher(new DiscardBuildPublisher(
+				"100000", "", "5", "",
+				false, false, false, false, false,
+				"", "", "", false, true));
+
+		// emulates build data and post-build plugin operation
+		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
+
+		for (int i = 1; i < 11; i++) {
+			verify(buildListHMS.get(i), never()).delete();
+		}
 	}
 
     private FreeStyleBuild createBuild(FreeStyleProject project, Result result, String yyyymmdd) throws Exception {
