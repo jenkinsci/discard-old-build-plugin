@@ -271,9 +271,11 @@ public class DiscardBuildPublisher extends Recorder {
         }
     }
 
-    private void deleteOldBuildsByDays(AbstractBuild<?, ?> build, BuildListener listener, int daysToKeep) {
-        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+        private void deleteOldBuildsByDays(AbstractBuild<?, ?> build, BuildListener listener, int daysToKeep) {
+            ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
         if (daysToKeep == -1) return;
+        if (numToKeep != -1 && isHoldMaxBuilds())
+            list = HoldMaxBuilds(list, listener, numToKeep);
         try {
             Calendar cal = getCurrentCalendar();
             cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
@@ -317,6 +319,8 @@ public class DiscardBuildPublisher extends Recorder {
         ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
         if (numToKeep == -1) return;
         int index = 0;
+        if (daysToKeep != -1 && isHoldMaxBuilds())
+            return;
         try {
             for (Run<?, ?> r : list) {
                 if (index >= numToKeep)
@@ -365,8 +369,6 @@ public class DiscardBuildPublisher extends Recorder {
             list = keepLastBuilds(build, listener, builds);
         else
             list = discardLastBuilds(build, listener, builds);
-        if (isHoldMaxBuilds())
-            list = HoldMaxBuilds(list, listener, numToKeep);
         return list;
     }
 
