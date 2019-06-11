@@ -268,7 +268,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		}
 		for (int i = 6; i < 11; i++) {
 			verify(buildListHMS.get(i), times(1)).delete();
-			}
+		}
 	}
 
 	public void testPerformHoldMaxBuildsThirdCnd() throws Exception {

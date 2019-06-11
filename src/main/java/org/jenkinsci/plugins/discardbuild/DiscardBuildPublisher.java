@@ -271,8 +271,8 @@ public class DiscardBuildPublisher extends Recorder {
         }
     }
 
-        private void deleteOldBuildsByDays(AbstractBuild<?, ?> build, BuildListener listener, int daysToKeep) {
-            ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
+    private void deleteOldBuildsByDays(AbstractBuild<?, ?> build, BuildListener listener, int daysToKeep) {
+        ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
         if (daysToKeep == -1) return;
         if (numToKeep != -1 && isHoldMaxBuilds())
             list = HoldMaxBuilds(list, listener, numToKeep);
