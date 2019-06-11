@@ -376,7 +376,7 @@ public class DiscardBuildPublisher extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         listener.getLogger().println("Discard old builds..."); //$NON-NLS-1$
 
-        // priority influence discard results, TODO: dynamic adjust priority on UI
+        // priority influence discard results
         deleteOldBuildsByDays(build, listener, daysToKeep);
         deleteOldBuildsByNum(build, listener, numToKeep);
         deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
