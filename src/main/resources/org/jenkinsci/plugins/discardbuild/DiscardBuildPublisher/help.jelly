@@ -57,7 +57,7 @@
         <dt><code>Regular expression</code></dt>
         <dd>
             <p>
-                FILL
+                Parses log files and discards those that contain a user-defined expression.
             </p>
         </dd>
     </dl>
@@ -65,7 +65,7 @@
         <dt><code>Keep last builds</code></dt>
         <dd>
             <p>
-                FILL
+                Removes last builds from build history array prior to being passed through any discard conditions.
             </p>
         </dd>
     </dl>
