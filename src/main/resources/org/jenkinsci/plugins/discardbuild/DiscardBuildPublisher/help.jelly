@@ -82,11 +82,6 @@
             <p>
                 <b>NOTE:</b> This feature does nothing if <i>Days to keep builds</i> and/or <i>Max # of builds to keep</i> are empty.
             </p>
-            <p>
-                <b>Recommended Configuration:</b> Set a max age and build quantity and turn this feature on, leave
-                additional plugin settings in their default off setting. This configuration has been tested and
-                functions as described in the feature description.
-            </p>
         </dd>
     </dl>
 </j:jelly>
