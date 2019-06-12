@@ -248,7 +248,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 		// emulates build data and post-build plugin operation
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		for (int i = 1; i < 10; i++) {
+		for (int i = 0; i < 10; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
 	}
@@ -263,7 +263,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		for (int i = 1; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
 		for (int i = 6; i < 11; i++) {
@@ -281,7 +281,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		for (int i = 1; i < 11; i++) {
+		for (int i = 0; i < 11; i++) {
 			verify(buildListHMS.get(i), never()).delete();
 		}
 	}
@@ -296,7 +296,7 @@ public class DiscardBuildPublisherTest extends TestCase {
 
 		publisher.perform((AbstractBuild<?, ?>) buildHMS, launcher, listener);
 
-		for (int i = 1; i < 11; i++) {
+		for (int i = 0; i < 11; i++) {
 			verify(buildListHMS.get(i), times(1)).delete();
 		}
 	}
