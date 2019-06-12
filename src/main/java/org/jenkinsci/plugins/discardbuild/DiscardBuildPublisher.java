@@ -226,8 +226,8 @@ public class DiscardBuildPublisher extends Recorder {
             listener.getLogger().println("Too few builds present to remove any, clearing discard list.");
             listUpdt.clear();}
         else if (listCnt > maxCount) {
+            listener.getLogger().println("Removing builds from discard list to maintain max quantity:");
             for (int i = 0; i < maxCount; i++) {
-                listener.getLogger().println("Removing build from discard list to maintain max quantity:");
                 listener.getLogger().println(listUpdt.get(0));
                 listUpdt.remove(0);}
         }
