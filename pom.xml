@@ -3,17 +3,22 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.515</version><!-- which version of Jenkins is this plugin built against? -->
+    <version>1.642</version><!-- which version of Jenkins is this plugin built against? -->
   </parent>
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
   <artifactId>discard-old-build</artifactId>
-  <version>1.06-SNAPSHOT</version>
+  <version>1.X-feature-test</version>
   <packaging>hpi</packaging>
   <name>Discard Old Build plugin</name>
-  <description>Add post-build step to discard old builds with detail configuration</description>
-  
-  <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
+  <description>Jenkins plugin to manage old build discards with more user-configurability than core functionality</description>
+
+  <properties>
+    <jenkins.version>1.642</jenkins.version>
+    <java.level>7</java.level>
+  </properties>
+
+  <!-- get every artifact through repo.jenkins-ci.org, which proxies all needed artifacts -->
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
@@ -27,24 +32,26 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
+
   <dependencies>
   	<dependency>
-  		<groupId>maven</groupId>
-  		<artifactId>dom4j</artifactId>
-  		<version>1.7-20060614</version>
-  	</dependency>
-  	<dependency>
   		<groupId>org.mockito</groupId>
-  		<artifactId>mockito-all</artifactId>
-  		<version>1.9.5</version>
+  		<artifactId>mockito-core</artifactId>
+  		<version>2.28.2</version>
   		<scope>test</scope>
   	</dependency>
+    <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest</artifactId>
+        <version>2.1</version>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <licenses>
     <license>
-      <name>MIT</name>
-      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
 
@@ -69,7 +76,7 @@
   <distributionManagement>
     <repository>
       <id>maven.jenkins-ci.org</id>
-      <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
+      <url>https://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
     </repository>
   </distributionManagement>
 
@@ -79,6 +86,6 @@
     <url>https://github.com/jenkinsci/discard-old-build-plugin</url>
   </scm>
 
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Discard+Old+Build+plugin</url>
+  <url>https://wiki.jenkins-ci.org/display/JENKINS/Discard+Old+Build+plugin</url>
 
 </project>

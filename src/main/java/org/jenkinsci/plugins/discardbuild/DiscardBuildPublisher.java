@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.jenkinsci.plugins.discardbuild;
 
 import hudson.Extension;
@@ -25,14 +22,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Builder that discards old build histories according to more detail configurations than the core function.
- * This enables discarding builds by build status or keeping older builds for every N builds / N days
- * or discarding buildswhich has too small or too big logfile size.
+ * Plugin that discards old build histories with greater user configurability than the core function.
+ * Enables discarding builds by status, keeping older builds for every N builds / N days,
+ * or discarding builds which have too small or too large logfile size (along with a combination of some of these).
  *
- * @author tamagawahiroko
+ * @author tamagawahiroko, benjaminbeggs
  */
-public class DiscardBuildPublisher extends Recorder {
 
+public class DiscardBuildPublisher extends Recorder {
     /**
      * If not -1, history is only kept up to this days.
      */
@@ -66,6 +63,10 @@ public class DiscardBuildPublisher extends Recorder {
      */
     private final boolean keepLastBuilds;
     /**
+     * If true, will always keep a number of builds equal to or lesser than the max number of builds the user defines.
+     */
+    private final boolean holdMaxBuilds;
+    /**
      * Regular expression.
      */
     private final String regexp;
@@ -84,7 +85,8 @@ public class DiscardBuildPublisher extends Recorder {
             String minLogFileSize,
             String maxLogFileSize,
             String regexp,
-            boolean keepLastBuilds
+            boolean keepLastBuilds,
+            boolean holdMaxBuilds
     ) {
 
         this.daysToKeep = parse(daysToKeep);
@@ -113,7 +115,9 @@ public class DiscardBuildPublisher extends Recorder {
         this.maxLogFileSize = parseLong(maxLogFileSize);
 
         this.regexp = regexp;
+
         this.keepLastBuilds = keepLastBuilds;
+        this.holdMaxBuilds = holdMaxBuilds;
     }
 
     private static int parse(String p) {
@@ -164,11 +168,9 @@ public class DiscardBuildPublisher extends Recorder {
 
     class ExtendRunList extends RunList<Run<?, ?>> {
         private ArrayList<Run<?, ?>> newList;
-
         ExtendRunList() {
             newList = new ArrayList<Run<?, ?>>();
         }
-
         ArrayList<Run<?, ?>> getNewList() {
             return newList;
         }
@@ -216,6 +218,22 @@ public class DiscardBuildPublisher extends Recorder {
         return newList.getNewList();
     }
 
+    private ArrayList<Run<?, ?>> HoldMaxBuilds(ArrayList<Run<?, ?>> listIn, BuildListener listener, int maxCount) {
+        ArrayList<Run<?, ?>> listUpdt = new ArrayList<Run<?, ?>>();
+        listUpdt = listIn;
+        int listCnt = listUpdt.size();
+        if (listCnt < maxCount||listCnt == maxCount){ // clear discard list if beneath minimum build quantity
+            listener.getLogger().println("Too few builds present to remove any, clearing discard list.");
+            listUpdt.clear();}
+        else if (listCnt > maxCount) {
+            listener.getLogger().println("Removing builds from discard list to maintain max quantity:");
+            for (int i = 0; i < maxCount; i++) {
+                listener.getLogger().println(listUpdt.get(0));
+                listUpdt.remove(0);}
+        }
+        return listUpdt;
+    }
+
     private void deleteOldBuildsByRegexp(AbstractBuild<?, ?> build, BuildListener listener, String regexp) {
         ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
         if (regexp == null || regexp.equals("")) return;
@@ -256,6 +274,8 @@ public class DiscardBuildPublisher extends Recorder {
     private void deleteOldBuildsByDays(AbstractBuild<?, ?> build, BuildListener listener, int daysToKeep) {
         ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
         if (daysToKeep == -1) return;
+        if (numToKeep != -1 && isHoldMaxBuilds())
+            list = HoldMaxBuilds(list, listener, numToKeep);
         try {
             Calendar cal = getCurrentCalendar();
             cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
@@ -299,6 +319,8 @@ public class DiscardBuildPublisher extends Recorder {
         ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
         if (numToKeep == -1) return;
         int index = 0;
+        if (daysToKeep != -1 && isHoldMaxBuilds())
+            return;
         try {
             for (Run<?, ?> r : list) {
                 if (index >= numToKeep)
@@ -342,7 +364,6 @@ public class DiscardBuildPublisher extends Recorder {
         RunList<Run<?, ?>> builds = new RunList<Run<?, ?>>();
         ArrayList<Run<?, ?>> list = new ArrayList<Run<?, ?>>();
         Job<?, ?> job = (Job<?, ?>) build.getParent();
-
         builds = (RunList<Run<?, ?>>) job.getBuilds();
         if (isKeepLastBuilds())
             list = keepLastBuilds(build, listener, builds);
@@ -355,7 +376,7 @@ public class DiscardBuildPublisher extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         listener.getLogger().println("Discard old builds..."); //$NON-NLS-1$
 
-        // priority influence discard results, TODO: dynamic adjust priority on UI
+        // priority influence discard results
         deleteOldBuildsByDays(build, listener, daysToKeep);
         deleteOldBuildsByNum(build, listener, numToKeep);
         deleteOldBuildsByIntervalDays(build, listener, intervalDaysToKeep);
@@ -446,9 +467,9 @@ public class DiscardBuildPublisher extends Recorder {
         return resultsToDiscard.contains(Result.ABORTED);
     }
 
-    public boolean isKeepLastBuilds() {
-        return keepLastBuilds;
-    }
+    public boolean isKeepLastBuilds() { return keepLastBuilds;}
+
+    public boolean isHoldMaxBuilds() { return holdMaxBuilds;}
 
     @Override
     public DescriptorImpl getDescriptor() {

@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
     <f:entry title="${%DaysToKeep}" field="daysToKeep">
       <f:textbox />
@@ -42,6 +43,7 @@
         <table>
             <tr>
                 <td><f:checkbox title="${%KeepLastBuilds}" name="keepLastBuilds" checked="${instance.keepLastBuilds}"/></td>
+                <td><f:checkbox title="${%HoldMaxBuilds}" name="holdMaxBuilds" checked="${instance.holdMaxBuilds}"/></td>
             </tr>
         </table>
     </f:block>
