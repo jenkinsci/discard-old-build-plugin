@@ -16,18 +16,17 @@
         <f:textbox />
     </f:entry>
 
-    <f:block>
+    <f:entry title="${%StatusToDiscard}" field="StatusToDiscard">
         <table>
-        <tr>
-        <td>${%StatusToDiscard}</td>
-        <td><f:checkbox title="${%Success}" name="discardSuccess" checked="${instance.discardSuccess}"/></td>
-        <td><f:checkbox title="${%Unstable}" name="discardUnstable" checked="${instance.discardUnstable}"/></td>
-        <td><f:checkbox title="${%Failure}" name="discardFailure" checked="${instance.discardFailure}"/></td>
-        <td><f:checkbox title="${%NotBuilt}" name="discardNotBuilt" checked="${instance.discardNotBuilt}"/></td>
-        <td><f:checkbox title="${%Aborted}" name="discardAborted" checked="${instance.discardAborted}"/></td>
-        </tr>
+            <tr>
+                <td><f:checkbox title="${%Success}" name="discardSuccess" checked="${instance.discardSuccess}"/></td>
+                <td><f:checkbox title="${%Unstable}" name="discardUnstable" checked="${instance.discardUnstable}"/></td>
+                <td><f:checkbox title="${%Failure}" name="discardFailure" checked="${instance.discardFailure}"/></td>
+                <td><f:checkbox title="${%NotBuilt}" name="discardNotBuilt" checked="${instance.discardNotBuilt}"/></td>
+                <td><f:checkbox title="${%Aborted}" name="discardAborted" checked="${instance.discardAborted}"/></td>
+            </tr>
         </table>
-    </f:block>
+    </f:entry>
 
     <f:entry title="${%MinLogFileSize}" field="minLogFileSize">
       <f:textbox />
@@ -42,8 +41,16 @@
     <f:block>
         <table>
             <tr>
-                <td><f:checkbox title="${%KeepLastBuilds}" name="keepLastBuilds" checked="${instance.keepLastBuilds}"/></td>
-                <td><f:checkbox title="${%HoldMaxBuilds}" name="holdMaxBuilds" checked="${instance.holdMaxBuilds}"/></td>
+                <td>
+                    <f:entry field="keepLastBuilds">
+                        <f:checkbox title="${%KeepLastBuilds}" name="keepLastBuilds" checked="${instance.keepLastBuilds}"/>
+                    </f:entry>
+                </td>
+                <td>
+                    <f:entry field="holdMaxBuilds">
+                        <f:checkbox title="${%HoldMaxBuilds}" field="holdMaxBuilds" checked="${instance.holdMaxBuilds}"/>
+                    </f:entry>
+                </td>
             </tr>
         </table>
     </f:block>
