@@ -10,8 +10,8 @@ The plugin functions as a post-build action with the below interface used for co
 ![Plugin](interface.png)
 
 The configuration settings allow for builds to be discarded based on age, quantity, intervals of these properties, 
-status, logfile size and expressions parsed from logfiles. **Features are described in detail in the Jelly help 
-documentation accessible through the top-right of the interface.**
+status, logfile size and expressions parsed from logfiles. **Features are described in detail in the help 
+documentation accessible through the question mark symbols (?) on the user interface.**
 
 Discard conditions are executed in the order shown in the UI. The only exception to this is when using 
 *Require both quantity and age conditions to be met for build discard*. Example case uses of this particular feature are
