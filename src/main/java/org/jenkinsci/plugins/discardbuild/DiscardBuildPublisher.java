@@ -33,11 +33,11 @@ public class DiscardBuildPublisher extends Recorder {
     /**
      * If not -1, history is only kept up to this days.
      */
-    private final int daysToKeep;
+    private final String daysToKeep;
     /**
      * If not -1, only this number of build logs are kept.
      */
-    private final int numToKeep;
+    private final String numToKeep;
     /**
      * Set of build results to be kept.
      */
@@ -45,19 +45,19 @@ public class DiscardBuildPublisher extends Recorder {
     /**
      * If not -1, history is only kept up to this logfile size.
      */
-    private final long minLogFileSize;
+    private final String minLogFileSize;
     /**
      * If not -1, history is only kept lower than this logfile size.
      */
-    private final long maxLogFileSize;
+    private final String maxLogFileSize;
     /**
      * If not -1, old histories are kept by the specified interval days.
      */
-    private final int intervalDaysToKeep;
+    private final String intervalDaysToKeep;
     /**
      * If not -1, old histories are kept by the specified interval builds.
      */
-    private final int intervalNumToKeep;
+    private final String intervalNumToKeep;
     /**
      * If true, will keep the last builds.
      */
@@ -89,10 +89,10 @@ public class DiscardBuildPublisher extends Recorder {
             boolean holdMaxBuilds
     ) {
 
-        this.daysToKeep = parse(daysToKeep);
-        this.intervalDaysToKeep = parse(intervalDaysToKeep);
-        this.numToKeep = parse(numToKeep);
-        this.intervalNumToKeep = parse(intervalNumToKeep);
+        this.daysToKeep = daysToKeep;
+        this.intervalDaysToKeep = intervalDaysToKeep;
+        this.numToKeep = numToKeep;
+        this.intervalNumToKeep = intervalNumToKeep;
 
         resultsToDiscard = new HashSet<Result>();
         if (discardSuccess) {
@@ -111,8 +111,8 @@ public class DiscardBuildPublisher extends Recorder {
             resultsToDiscard.add(Result.ABORTED);
         }
 
-        this.minLogFileSize = parseLong(minLogFileSize);
-        this.maxLogFileSize = parseLong(maxLogFileSize);
+        this.minLogFileSize = minLogFileSize;
+        this.maxLogFileSize = maxLogFileSize;
 
         this.regexp = regexp;
 
@@ -375,6 +375,8 @@ public class DiscardBuildPublisher extends Recorder {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         listener.getLogger().println("Discard old builds..."); //$NON-NLS-1$
+
+        if parse(daysToKeep)
 
         // priority influence discard results
         deleteOldBuildsByDays(build, listener, daysToKeep);
