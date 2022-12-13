@@ -217,7 +217,6 @@ public class DiscardBuildPublisher extends Recorder {
     }
 
     private ArrayList<Run<?, ?>> discardLastBuilds(AbstractBuild<?, ?> build, BuildListener listener, RunList<Run<?, ?>> builds) {
-        Job<?, ?> job = (Job<?, ?>) build.getParent();
         ExtendRunList newList = new ExtendRunList();
         for (Run<?, ?> r : builds) {
             newList.add(r);
@@ -226,8 +225,7 @@ public class DiscardBuildPublisher extends Recorder {
     }
 
     private ArrayList<Run<?, ?>> HoldMaxBuilds(ArrayList<Run<?, ?>> listIn, BuildListener listener, int maxCount) {
-        ArrayList<Run<?, ?>> listUpdt = new ArrayList<Run<?, ?>>();
-        listUpdt = listIn;
+        ArrayList<Run<?, ?>> listUpdt = listIn;
         int listCnt = listUpdt.size();
         if (listCnt < maxCount||listCnt == maxCount){ // clear discard list if beneath minimum build quantity
             listener.getLogger().println("Too few builds present to remove any, clearing discard list.");
@@ -368,10 +366,9 @@ public class DiscardBuildPublisher extends Recorder {
     }
 
     private ArrayList<Run<?, ?>> updateBuildsList(AbstractBuild<?, ?> build, BuildListener listener) {
-        RunList<Run<?, ?>> builds = new RunList<Run<?, ?>>();
-        ArrayList<Run<?, ?>> list = new ArrayList<Run<?, ?>>();
+        ArrayList<Run<?, ?>> list;
         Job<?, ?> job = (Job<?, ?>) build.getParent();
-        builds = (RunList<Run<?, ?>>) job.getBuilds();
+        RunList<Run<?, ?>> builds = (RunList<Run<?, ?>>) job.getBuilds();
         if (isKeepLastBuilds())
             list = keepLastBuilds(build, listener, builds);
         else
