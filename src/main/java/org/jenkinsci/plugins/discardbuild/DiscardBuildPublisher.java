@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.discardbuild;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.*;
@@ -138,6 +140,8 @@ public class DiscardBuildPublisher extends Recorder {
         }
     }
 
+    @SuppressFBWarnings(value = "DM_DEFAULT_ENCODING",
+                        justification = "Replace in Java 11 with two argument FileReader call")
     private static boolean isRegexpMatch(File logFile, String regexp) throws IOException, InterruptedException {
         if (regexp == null) return false;
         String line;
@@ -166,6 +170,8 @@ public class DiscardBuildPublisher extends Recorder {
         }
     }
 
+    @SuppressFBWarnings(value = "SIC_INNER_SHOULD_BE_STATIC",
+                        justification = "Evaluate later if interest in the plugin rises")
     class ExtendRunList extends RunList<Run<?, ?>> {
         private ArrayList<Run<?, ?>> newList;
         ExtendRunList() {
