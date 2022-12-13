@@ -3,7 +3,8 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>1.642</version><!-- which version of Jenkins is this plugin built against? -->
+    <version>4.51</version>
+    <relativePath />
   </parent>
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
@@ -14,8 +15,7 @@
   <description>Jenkins plugin to manage old build discards with more user-configurability than core functionality</description>
 
   <properties>
-    <jenkins.version>1.642</jenkins.version>
-    <java.level>7</java.level>
+    <jenkins.version>2.346.3</jenkins.version>
   </properties>
 
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all needed artifacts -->
@@ -34,17 +34,10 @@
   </pluginRepositories>
 
   <dependencies>
-  	<dependency>
-  		<groupId>org.mockito</groupId>
-  		<artifactId>mockito-core</artifactId>
-  		<version>2.28.2</version>
-  		<scope>test</scope>
-  	</dependency>
     <dependency>
-        <groupId>org.hamcrest</groupId>
-        <artifactId>hamcrest</artifactId>
-        <version>2.1</version>
-        <scope>test</scope>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -73,13 +66,6 @@
     </developer>
   </developers>
 
-  <distributionManagement>
-    <repository>
-      <id>maven.jenkins-ci.org</id>
-      <url>https://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-    </repository>
-  </distributionManagement>
-
   <scm>
     <connection>scm:git:ssh://github.com/jenkinsci/discard-old-build-plugin.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/jenkinsci/discard-old-build-plugin.git</developerConnection>
@@ -88,4 +74,15 @@
 
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Discard+Old+Build+plugin</url>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-2.346.x</artifactId>
+        <version>1742.vb_70478c1b_25f</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>
