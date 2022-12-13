@@ -146,10 +146,11 @@ public class DiscardBuildPublisher extends Recorder {
         if (regexp == null) return false;
         String line;
         Pattern pattern = Pattern.compile(regexp);
-        BufferedReader reader = new BufferedReader(new FileReader(logFile));
-        while ((line = reader.readLine()) != null) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) return true;
+        try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+            while ((line = reader.readLine()) != null) {
+                Matcher matcher = pattern.matcher(line);
+                if (matcher.find()) return true;
+            }
         }
         return false;
     }
