@@ -72,7 +72,7 @@
     <url>https://github.com/jenkinsci/discard-old-build-plugin</url>
   </scm>
 
-  <url>https://wiki.jenkins-ci.org/display/JENKINS/Discard+Old+Build+plugin</url>
+  <url>https://github.com/jenkinsci/discard-old-build-plugin</url>
 
   <dependencyManagement>
     <dependencies>
