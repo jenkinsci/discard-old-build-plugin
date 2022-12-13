@@ -419,7 +419,7 @@ public class DiscardBuildPublisher extends Recorder {
      * @throws IOException when deletion failed
      */
     private void discardBuild(Run<?, ?> history, String reason, BuildListener listener) throws IOException {
-        listener.getLogger().printf("#%d is removed because %s\n", history.getNumber(), reason); //$NON-NLS-1$
+        listener.getLogger().printf("#%d is removed because %s%n", history.getNumber(), reason); //$NON-NLS-1$
         history.delete();
     }
 
