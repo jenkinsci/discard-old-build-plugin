@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.discardbuild;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.*;
@@ -138,14 +140,17 @@ public class DiscardBuildPublisher extends Recorder {
         }
     }
 
+    @SuppressFBWarnings(value = "DM_DEFAULT_ENCODING",
+                        justification = "Replace in Java 11 with two argument FileReader call")
     private static boolean isRegexpMatch(File logFile, String regexp) throws IOException, InterruptedException {
         if (regexp == null) return false;
         String line;
         Pattern pattern = Pattern.compile(regexp);
-        BufferedReader reader = new BufferedReader(new FileReader(logFile));
-        while ((line = reader.readLine()) != null) {
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.find()) return true;
+        try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+            while ((line = reader.readLine()) != null) {
+                Matcher matcher = pattern.matcher(line);
+                if (matcher.find()) return true;
+            }
         }
         return false;
     }
@@ -166,6 +171,8 @@ public class DiscardBuildPublisher extends Recorder {
         }
     }
 
+    @SuppressFBWarnings(value = "SIC_INNER_SHOULD_BE_STATIC",
+                        justification = "Evaluate later if interest in the plugin rises")
     class ExtendRunList extends RunList<Run<?, ?>> {
         private ArrayList<Run<?, ?>> newList;
         ExtendRunList() {
@@ -210,7 +217,6 @@ public class DiscardBuildPublisher extends Recorder {
     }
 
     private ArrayList<Run<?, ?>> discardLastBuilds(AbstractBuild<?, ?> build, BuildListener listener, RunList<Run<?, ?>> builds) {
-        Job<?, ?> job = (Job<?, ?>) build.getParent();
         ExtendRunList newList = new ExtendRunList();
         for (Run<?, ?> r : builds) {
             newList.add(r);
@@ -219,8 +225,7 @@ public class DiscardBuildPublisher extends Recorder {
     }
 
     private ArrayList<Run<?, ?>> HoldMaxBuilds(ArrayList<Run<?, ?>> listIn, BuildListener listener, int maxCount) {
-        ArrayList<Run<?, ?>> listUpdt = new ArrayList<Run<?, ?>>();
-        listUpdt = listIn;
+        ArrayList<Run<?, ?>> listUpdt = listIn;
         int listCnt = listUpdt.size();
         if (listCnt < maxCount||listCnt == maxCount){ // clear discard list if beneath minimum build quantity
             listener.getLogger().println("Too few builds present to remove any, clearing discard list.");
@@ -361,10 +366,9 @@ public class DiscardBuildPublisher extends Recorder {
     }
 
     private ArrayList<Run<?, ?>> updateBuildsList(AbstractBuild<?, ?> build, BuildListener listener) {
-        RunList<Run<?, ?>> builds = new RunList<Run<?, ?>>();
-        ArrayList<Run<?, ?>> list = new ArrayList<Run<?, ?>>();
+        ArrayList<Run<?, ?>> list;
         Job<?, ?> job = (Job<?, ?>) build.getParent();
-        builds = (RunList<Run<?, ?>>) job.getBuilds();
+        RunList<Run<?, ?>> builds = (RunList<Run<?, ?>>) job.getBuilds();
         if (isKeepLastBuilds())
             list = keepLastBuilds(build, listener, builds);
         else
@@ -415,7 +419,7 @@ public class DiscardBuildPublisher extends Recorder {
      * @throws IOException when deletion failed
      */
     private void discardBuild(Run<?, ?> history, String reason, BuildListener listener) throws IOException {
-        listener.getLogger().printf("#%d is removed because %s\n", history.getNumber(), reason); //$NON-NLS-1$
+        listener.getLogger().printf("#%d is removed because %s%n", history.getNumber(), reason); //$NON-NLS-1$
         history.delete();
     }
 
@@ -479,10 +483,9 @@ public class DiscardBuildPublisher extends Recorder {
     /**
      * Descriptor for {@link DiscardBuildPublisher}. Used as a singleton. The class is
      * marked as public so that it can be accessed from views.
-     * <p/>
-     * <p/>
+     *
      * See
-     * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
+     * <code>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</code>
      * for the actual HTML fragment for the configuration screen.
      */
     @Extension
