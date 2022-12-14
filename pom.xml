@@ -9,13 +9,13 @@
 
   <groupId>jp.shiftinc.jenkins.plugins</groupId>
   <artifactId>discard-old-build</artifactId>
-  <version>1.07</version>
+  <version>${revision}${changelist}</version>
   <packaging>hpi</packaging>
   <name>Discard Old Build plugin</name>
   <description>Jenkins plugin to manage old build discards with more user-configurability than core functionality</description>
 
   <properties>
-    <revision>1.07</revision>
+    <revision>1.08</revision>
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/discard-old-build-plugin</gitHubRepo>
     <jenkins.version>2.346.3</jenkins.version>
@@ -72,7 +72,7 @@
   <scm>
     <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
     <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
-    <tag>discard-old-build-1.07</tag>
+    <tag>${scmTag}</tag>
     <url>https://github.com/${gitHubRepo}</url>
   </scm>
 
