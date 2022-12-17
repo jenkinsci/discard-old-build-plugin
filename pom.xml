@@ -19,6 +19,8 @@
     <changelist>-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/discard-old-build-plugin</gitHubRepo>
     <jenkins.version>2.346.3</jenkins.version>
+    <spotbugs.effort>Max</spotbugs.effort>   
+    <spotbugs.threshold>Low</spotbugs.threshold>
   </properties>
 
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all needed artifacts -->
