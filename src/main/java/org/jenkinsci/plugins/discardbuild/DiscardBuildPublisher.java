@@ -224,7 +224,7 @@ public class DiscardBuildPublisher extends Recorder {
         return newList.getNewList();
     }
 
-    private ArrayList<Run<?, ?>> HoldMaxBuilds(ArrayList<Run<?, ?>> listIn, BuildListener listener, int maxCount) {
+    private ArrayList<Run<?, ?>> processHoldMaxBuilds(ArrayList<Run<?, ?>> listIn, BuildListener listener, int maxCount) {
         ArrayList<Run<?, ?>> listUpdt = listIn;
         int listCnt = listUpdt.size();
         if (listCnt < maxCount||listCnt == maxCount){ // clear discard list if beneath minimum build quantity
@@ -280,7 +280,7 @@ public class DiscardBuildPublisher extends Recorder {
         ArrayList<Run<?, ?>> list = updateBuildsList(build, listener);
         if (daysToKeep == -1) return;
         if (numToKeep != -1 && isHoldMaxBuilds())
-            list = HoldMaxBuilds(list, listener, numToKeep);
+            list = processHoldMaxBuilds(list, listener, numToKeep);
         try {
             Calendar cal = getCurrentCalendar();
             cal.add(Calendar.DAY_OF_YEAR, -daysToKeep);
