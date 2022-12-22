@@ -21,7 +21,7 @@
     <jenkins.version>2.346.3</jenkins.version>
     <spotbugs.effort>Max</spotbugs.effort>
     <spotbugs.failOnError>true</spotbugs.failOnError>
-    <spotbugs.threshold>High</spotbugs.threshold>
+    <spotbugs.threshold>Low</spotbugs.threshold>
 
 
   </properties>
