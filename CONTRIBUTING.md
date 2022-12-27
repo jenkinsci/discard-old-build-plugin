@@ -61,7 +61,6 @@ Please don't introduce new spotbugs output.
 ## Maintaining automated tests
 
 Automated tests are run as part of the `verify` phase.
-Automated tests in the `continuous-integration` profile are run with multiple Java virtual machines, depending on the number of available processor cores.
 Run automated tests with multiple Java virtual machines in a development with the command:
 
 ```
