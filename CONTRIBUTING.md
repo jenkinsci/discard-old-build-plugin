@@ -74,10 +74,3 @@ Use the ["Report an issue" page](https://www.jenkins.io/participate/report-issue
 ## Security Issues
 
 Follow the [Jenkins project vulnerability reporting instructions](https://jenkins.io/security/reporting/) to report vulnerabilities.
-Footer
-© 2022 GitHub, Inc.
-Footer navigation
-Terms
-Privacy
-Security
-Status
