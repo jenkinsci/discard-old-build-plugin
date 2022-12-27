@@ -3,7 +3,7 @@
 Plugin source code is hosted on [GitHub](https://github.com/jenkinsci/discard-old-build-plugin).
 New feature proposals and bug fix proposals should be submitted as
 [GitHub pull requests](https://help.github.com/articles/creating-a-pull-request).
-Your pull request will be evaluated by the [Jenkins job](https://ci.jenkins.io/job/Plugins/job/built-on-column-plugin/).
+Your pull request will be evaluated by the [Jenkins job](https://ci.jenkins.io/job/Plugins/job/discard-old-build-plugin/).
 
 Before submitting your change, please assure that you've added tests which verify your change.
 
