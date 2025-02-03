@@ -409,9 +409,7 @@ public class DiscardBuildPublisher extends Recorder {
             throws IOException {
         if (!resultSet.isEmpty() && resultSet.contains(history.getResult())) {
             discardBuild(
-                    history,
-                    String.format("status %s is not to be kept", history.getResult()),
-                    listener); //$NON-NLS-1$
+                    history, "status %s is not to be kept".formatted(history.getResult()), listener); // $NON-NLS-1$
             return true;
         } else {
             return false;
