@@ -7,65 +7,54 @@ Your pull request will be evaluated by the [Jenkins job](https://ci.jenkins.io/j
 
 Before submitting your change, please assure that you've added tests which verify your change.
 
-## Run Locally
+## Building and running the plugin
 
-Prerequisites: Java, Maven
+The [plugin build process](https://www.jenkins.io/doc/developer/plugin-development/build-process/) is described in detail in the [plugin development chapter](https://www.jenkins.io/doc/developer/plugin-development/) of the [Jenkins developer guide](https://www.jenkins.io/doc/developer/).
 
-* Ensure Java 11 or 17 is available.
+A development copy of the plugin can be run locally with the command:
 
-```bash
-  $ java -version
+```
+mvn hpi:run
 ```
 
-* Ensure Maven is included in the PATH environment variable.
+When submitting a pull request, please refer to the [plugin testing guidance](https://www.jenkins.io/doc/developer/plugin-development/plugin-release-tips/) in the Jenkins developer guide.
 
-```bash
-  export PATH=$PATH:/path/to/apache-maven-3.8.6/bin
-```
-* To run a plugin locally, the command is:
+## Code formatting
 
-```bash
-  mvn hpi:run
-```
+Source code and pom file formatting is maintained by the `spotless` maven plugin.
+Before submitting a pull request, confirm the formatting is correct with:
 
-* That starts a Jenkins controller with the minimum Jenkins version supported by the plugin and loads the plugin and its dependencies into that controller. Jenkins will be running on port 8080 and can be reached with the URL http://localhost:8080/jenkins/
+* `mvn spotless:apply`
 
-  If a plugin maintainer wants to use a different Jenkins version, they run the command:
-
-```bash
-  mvn -Djenkins.version=2.375.1 hpi:run
-```
-
-* If a plugin maintainer wants to use a different HTTP port, (as in http://localhost:9090/jenkins) they run the command:
-
-```bash
-  mvn -Dport=9090 hpi:run
-```
-
-* If a plugin maintainer wants to allow other computers to access that Jenkins controller while it is running, they run the command:
-
-```bash
-  mvn -Dhost=0.0.0.0 hpi:run
-```
-
-## Code Coverage
-
-[JaCoCo code coverage](https://www.jacoco.org/jacoco/) reporting is available as a maven target and can be displayed by the [Jenkins warnings next generation plugin](https://plugins.jenkins.io/warnings-ng/).
-Please try to improve code coverage with tests when you submit.
-* `mvn -P enable-jacoco clean install jacoco:report` to report code coverage with JaCoCo.
+## Spotbugs checks
 
 Please don't introduce new spotbugs output.
-* `mvn spotbugs:check` to analyze project using [Spotbugs](https://spotbugs.github.io)
-* `mvn spotbugs:gui` to review report using GUI
 
-## Maintaining automated tests
+* `mvn spotbugs:check` analyzes the project using [Spotbugs](https://spotbugs.github.io)
+* `mvn spotbugs:gui` displays the spotbugs report using GUI
 
-Automated tests are run as part of the `verify` phase.
-Run automated tests with multiple Java virtual machines in a development with the command:
+## Code coverage
 
-```
-$ mvn clean -DforkCount=1C verify
-```
+Code coverage reporting is available as a maven target.
+Please try to improve code coverage with tests when you submit pull requests.
+
+* `mvn -P enable-jacoco clean install jacoco:report` reports code coverage
+
+### Reviewing code coverage
+
+The code coverage report shows methods and lines executed.
+The following commands will open the `index.html` file in the browser.
+
+* Windows - `start target\site\jacoco\index.html`
+* Linux - `xdg-open target/site/jacoco/index.html`
+* Gitpod - `cd target/site/jacoco && python -m http.server 8000`
+
+The file will have a list of package names.
+Click on them to find a list of class names.
+
+The lines of the code will be covered in three different colors, red, green, and orange.
+Red lines are not covered in the tests.
+Green lines are covered with tests.
 
 ## Report an Issue
 
