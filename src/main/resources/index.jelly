@@ -3,6 +3,6 @@
 -->
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin enables detail configuration to discard old builds like using
-    logfile size / status / days/ intervals days / build num / logfile regular expression.
+  Discard older builds based on additional critera like
+    build log size / build status / build age / build intervals / build counts / and build log regular expression.
 </div>
