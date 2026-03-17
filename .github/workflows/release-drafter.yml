@@ -1,11 +1,17 @@
-# Note: additional setup is required, see https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.adoc
-
+# Automates creation of Release Drafts using Release Drafter
+# More Info: https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.adoc
+---
 name: Release Drafter
 
 on:
   push:
+    # branches to consider in the event; optional, defaults to all
     branches:
-      - "master"
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   update_release_draft:
